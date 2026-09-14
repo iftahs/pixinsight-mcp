@@ -37,6 +37,8 @@ d("pixinsight-mcp end to end (fixtures)", () => {
   }, 120_000);
 
   afterAll(async () => {
+    // Close the PixInsight instance this suite launched (its own workdir → its own daemon).
+    try { await client?.callTool({ name: "pi_stop", arguments: { mode: "kill" } }); } catch { /* ignore */ }
     await client?.close();
   });
 
