@@ -62,6 +62,25 @@ export class BridgeClient {
     return this.jobs.get(id);
   }
 
+  /**
+   * Busy check that also works across server processes: the daemon heartbeat carries the job it is
+   * executing, so a second MCP server (or a restarted one) sees the pipeline another process started.
+   */
+  async assertIdle(op: string): Promise<void> {
+    const active = this.activeLongJob();
+    if (active) {
+      const r = await this.refresh(active.id);
+      if (r.status === "running" || r.status === "queued") throw new BridgeError("PI_BUSY", `PixInsight is busy with ${active.op} (job ${active.id}, ${r.status}). Poll job_status / job_wait, or job_cancel it, before running ${op}.`, { job_id: active.id });
+    }
+    const st = await this.launcher.status();
+    const busy = st.heartbeat?.busy;
+    if (busy && st.pid_alive && !this.jobs.has(busy.job_id)) {
+      // Started by another process; trust the heartbeat unless its result file says it finished.
+      const r = await readJsonSafe<JobResult>(this.resultPath(busy.job_id));
+      if (!r || r.status === "running") throw new BridgeError("PI_BUSY", `PixInsight is busy with ${busy.op} (job ${busy.job_id}, started ${busy.since} by another server process). Wait for it (job_status works across processes) before running ${op}.`, { job_id: busy.job_id });
+    }
+  }
+
   /** The currently running / queued long job, if any. */
   activeLongJob(): TrackedJob | undefined {
     for (const j of this.jobs.values()) {
@@ -78,6 +97,7 @@ export class BridgeClient {
   /** Submit a job. Returns immediately. */
   async startJob(op: string, args: Record<string, unknown>, opts: RunOptions = {}): Promise<TrackedJob> {
     await this.launcher.ensureAlive();
+    if (opts.long) await this.assertIdle(op);
     const id = makeId("job");
     const logPath = path.join(this.layout.bridgeLogs, `${id}.log`);
     const req: JobRequest = {
@@ -111,7 +131,14 @@ export class BridgeClient {
     const t = this.jobs.get(id);
     if (!t) {
       const r = await readJsonSafe<JobResult>(this.resultPath(id));
-      if (r) return r;
+      if (r) {
+        if (r.status === "running") {
+          const tail = await tailFile(path.join(this.layout.bridgeLogs, `${id}.log`), 16_384);
+          const p = parseProgressFromLog(tail, r.progress);
+          if (p) r.progress = { ...r.progress, ...p };
+        }
+        return r;
+      }
       throw new BridgeError("JOB_NOT_FOUND", `Unknown job ${id}`);
     }
     const r = await readJsonSafe<JobResult>(this.resultPath(id));
@@ -162,13 +189,7 @@ export class BridgeClient {
    * (the daemon is single-threaded; queuing behind a 40-minute integration is not useful).
    */
   async run<T = unknown>(op: string, args: Record<string, unknown>, opts: RunOptions = {}): Promise<T> {
-    const active = this.activeLongJob();
-    if (active) {
-      const r = await this.refresh(active.id);
-      if (r.status === "running" || r.status === "queued") {
-        throw new BridgeError("PI_BUSY", `PixInsight is busy with ${active.op} (job ${active.id}, ${r.status}). Poll job_status / job_wait, or job_cancel it, before running ${op}.`, { job_id: active.id });
-      }
-    }
+    await this.assertIdle(op);
     const timeout = opts.timeoutMs ?? DEFAULT_SYNC_TIMEOUT;
     const job = await this.startJob(op, args, { ...opts, timeoutMs: timeout });
     const r = await this.awaitJob(job.id, timeout + 5_000);
@@ -187,11 +208,7 @@ export class BridgeClient {
    * plate solving, SPCC, deconvolution, etc.
    */
   async runOrDefer<T = unknown>(op: string, args: Record<string, unknown>, opts: RunOptions & { deferAfterMs?: number } = {}): Promise<T | { deferred: true; job_id: string; op: string; note: string; progress?: JobProgress }> {
-    const active = this.activeLongJob();
-    if (active) {
-      const r = await this.refresh(active.id);
-      if (r.status === "running" || r.status === "queued") throw new BridgeError("PI_BUSY", `PixInsight is busy with ${active.op} (job ${active.id}). Poll job_status / job_wait first.`, { job_id: active.id });
-    }
+    await this.assertIdle(op);
     const timeout = opts.timeoutMs ?? 3_600_000;
     const job = await this.startJob(op, args, { ...opts, timeoutMs: timeout, long: true });
     try {
