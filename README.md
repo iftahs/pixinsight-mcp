@@ -193,6 +193,12 @@ PixInsight 1.9.4 — the source of truth for parameter names. Regenerate with
   `generate(image)`.
 - The PJSR preprocessor treats `/*` inside a `//` comment as a block-comment start.
 - Scripts that use `let`/`class` in `#include`d files need `#engine v8` in the *including* file.
+- `SubframeSelector.measurements` is read-only from scripts and weighting expressions evaluate to
+  0 when driven from a script, so subframe weights are computed in Node (`computeWeights`) and
+  written into the frames as `SSWEIGHT` by the `write_weights` op.
+- ImageSolver 6.x: `solver.initialize(window, false)` then `solver.solveImage(window)` (throws).
+  Plate solving and SPCC need the Gaia DR3/SP catalog: either the local database files
+  (PixInsight → Resources → Gaia DR3) or a working TLS connection to VizieR.
 
 ## Safety
 

@@ -51,7 +51,7 @@ build_master_bias / build_master_dark / build_master_flat   (cached by content f
 calibrate_lights
 cosmetic_correction   (cfa: true — the frames are still mosaiced)
 debayer               (one-shot colour only)
-measure_subframes → select_subframes   (approval written as a SubframeSelector expression)
+measure_subframes → select_subframes   (weights computed from FWHM/eccentricity/SNR, stamped as SSWEIGHT)
 register              (+ .xdrz drizzle data)
 local_normalization
 integrate             (→ master light view + rejection maps)
