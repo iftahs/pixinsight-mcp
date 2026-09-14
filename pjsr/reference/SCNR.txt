@@ -1,0 +1,5 @@
+var P = new SCNR;
+P.amount = 1.00;
+P.protectionMethod = SCNR.AverageNeutral;
+P.colorToRemove = SCNR.Green;
+P.preserveLightness = true;

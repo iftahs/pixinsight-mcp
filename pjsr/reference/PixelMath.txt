@@ -1,0 +1,33 @@
+var P = new PixelMath;
+P.expression = "";
+P.expression1 = "";
+P.expression2 = "";
+P.expression3 = "";
+P.useSingleExpression = true;
+P.symbols = "";
+P.clearImageCacheAndExit = false;
+P.cacheGeneratedImages = false;
+P.generateOutput = true;
+P.singleThreaded = false;
+P.optimization = true;
+P.use64BitWorkingImage = false;
+P.rescale = false;
+P.rescaleLower = 0;
+P.rescaleUpper = 1;
+P.truncate = true;
+P.truncateLower = 0;
+P.truncateUpper = 1;
+P.createNewImage = false;
+P.showNewImage = true;
+P.newImageId = "";
+P.newImageWidth = 0;
+P.newImageHeight = 0;
+P.newImageAlpha = false;
+P.newImageColorSpace = PixelMath.SameAsTarget;
+P.newImageSampleFormat = PixelMath.SameAsTarget;
+/*
+ * Read-only properties
+ *
+P.outputData = [ // globalVariableId, globalVariableRK, globalVariableG, globalVariableB
+];
+ */

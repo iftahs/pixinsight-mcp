@@ -1,0 +1,13 @@
+var P = new Superbias;
+P.columns = true;
+P.rows = false;
+P.medianTransform = true;
+P.excludeLargeScale = true;
+P.multiscaleLayers = 7;
+P.trimmingFactor = 0.200;
+/*
+ * Read-only properties
+ *
+P.superbiasViewId = "";
+P.superbiasViewId1 = "";
+ */

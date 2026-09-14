@@ -1,0 +1,17 @@
+var P = new MorphologicalTransformation;
+P.operator = MorphologicalTransformation.Erosion;
+P.interlacingDistance = 1;
+P.lowThreshold = 0.000000;
+P.highThreshold = 0.000000;
+P.numberOfIterations = 1;
+P.amount = 1.00;
+P.selectionPoint = 0.50;
+P.structureName = "";
+P.structureSize = 3;
+P.structureWayTable = [ // mask
+   [[
+      0x01,0x01,0x01,
+      0x01,0x01,0x01,
+      0x01,0x01,0x01
+   ]]
+];

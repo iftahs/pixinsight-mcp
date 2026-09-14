@@ -1,0 +1,17 @@
+var P = new StarMask;
+P.shadowsClipping = 0.00000;
+P.midtonesBalance = 0.50000;
+P.highlightsClipping = 1.00000;
+P.waveletLayers = 5;
+P.structureContours = false;
+P.noiseThreshold = 0.10000;
+P.aggregateStructures = false;
+P.binarizeStructures = false;
+P.largeScaleGrowth = 2;
+P.smallScaleGrowth = 1;
+P.growthCompensation = 2;
+P.smoothness = 16;
+P.invert = false;
+P.truncation = 1.00000;
+P.limit = 1.00000;
+P.mode = StarMask.StarMask;

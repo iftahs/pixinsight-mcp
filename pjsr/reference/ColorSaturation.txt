@@ -1,0 +1,7 @@
+var P = new ColorSaturation;
+P.HS = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 0.00000]
+];
+P.HSt = ColorSaturation.AkimaSubsplines;
+P.hueShift = 0.000;

@@ -1,0 +1,2 @@
+var P = new SampleFormatConversion;
+P.format = SampleFormatConversion.ToFloat;

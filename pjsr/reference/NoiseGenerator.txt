@@ -1,0 +1,5 @@
+var P = new NoiseGenerator;
+P.amount = 0.1000000;
+P.distribution = NoiseGenerator.Uniform;
+P.impulsionalNoiseProbability = 0.0500;
+P.preserveBrightness = NoiseGenerator.None;

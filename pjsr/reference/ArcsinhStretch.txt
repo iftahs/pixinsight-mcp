@@ -1,0 +1,6 @@
+var P = new ArcsinhStretch;
+P.stretch = 1.00;
+P.blackPoint = 0.000000;
+P.protectHighlights = false;
+P.useRGBWS = false;
+P.previewClipped = true;

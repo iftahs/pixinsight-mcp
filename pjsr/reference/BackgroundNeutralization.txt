@@ -1,0 +1,11 @@
+var P = new BackgroundNeutralization;
+P.backgroundReferenceViewId = "";
+P.backgroundLow = 0.0000000;
+P.backgroundHigh = 0.1000000;
+P.useROI = false;
+P.roiX0 = 0;
+P.roiY0 = 0;
+P.roiX1 = 0;
+P.roiY1 = 0;
+P.mode = BackgroundNeutralization.RescaleAsNeeded;
+P.targetBackground = 0.0010000;

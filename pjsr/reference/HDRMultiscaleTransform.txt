@@ -1,0 +1,35 @@
+var P = new HDRMultiscaleTransform;
+P.numberOfLayers = 6;
+P.numberOfIterations = 1;
+P.invertedIterations = true;
+P.overdrive = 0.000;
+P.medianTransform = false;
+P.scalingFunctionData = [
+   0.003906,0.015625,0.023438,0.015625,0.003906,
+   0.015625,0.0625,0.09375,0.0625,0.015625,
+   0.023438,0.09375,0.140625,0.09375,0.023438,
+   0.015625,0.0625,0.09375,0.0625,0.015625,
+   0.003906,0.015625,0.023438,0.015625,0.003906
+];
+P.scalingFunctionRowFilter = [
+   0.0625,0.25,
+   0.375,0.25,
+   0.0625
+];
+P.scalingFunctionColFilter = [
+   0.0625,0.25,
+   0.375,0.25,
+   0.0625
+];
+P.scalingFunctionName = "B3 Spline (5)";
+P.deringing = false;
+P.smallScaleDeringing = 0.000;
+P.largeScaleDeringing = 0.250;
+P.outputDeringingMaps = false;
+P.midtonesBalanceMode = HDRMultiscaleTransform.Automatic;
+P.midtonesBalance = 0.500000;
+P.toIntensity = false;
+P.toLightness = false;
+P.preserveHue = false;
+P.lightnessMask = false;
+P.intensity = 1.00;

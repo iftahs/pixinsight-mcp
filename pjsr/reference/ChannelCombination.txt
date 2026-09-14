@@ -1,0 +1,8 @@
+var P = new ChannelCombination;
+P.colorSpace = ChannelCombination.RGB;
+P.channels = [ // enabled, id
+   [true, ""],
+   [true, ""],
+   [true, ""]
+];
+P.inheritAstrometricSolution = true;

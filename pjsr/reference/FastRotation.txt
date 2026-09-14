@@ -1,0 +1,3 @@
+var P = new FastRotation;
+P.mode = FastRotation.Rotate180;
+P.noGUIMessages = false;

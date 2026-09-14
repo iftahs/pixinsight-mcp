@@ -1,0 +1,5 @@
+var P = new ExponentialTransformation;
+P.functionType = ExponentialTransformation.PIP;
+P.order = 1.00;
+P.sigma = 0.00;
+P.useLightnessMask = true;

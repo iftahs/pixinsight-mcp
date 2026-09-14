@@ -1,0 +1,8 @@
+{
+  "piExe": "C:/Program Files/PixInsight/bin/PixInsight.exe",
+  "dataRoot": "C:/path/to/your/Astronomy",
+  "requireFlats": false,
+  "allowRawScripts": true,
+  "autoLaunch": true,
+  "rig": { "pixelSizeUm": 3.76, "focalLengthMm": 490, "cameraGainEPerAdu": 0.25, "bayerPattern": "RGGB" }
+}

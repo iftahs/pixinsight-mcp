@@ -1,0 +1,11 @@
+var P = new UnsharpMask;
+P.sigma = 2.00;
+P.amount = 0.80;
+P.useLuminance = true;
+P.linear = false;
+P.deringing = false;
+P.deringingDark = 0.1000;
+P.deringingBright = 0.0000;
+P.outputDeringingMaps = false;
+P.rangeLow = 0.0000000;
+P.rangeHigh = 0.0000000;

@@ -1,0 +1,8 @@
+var P = new RangeSelection;
+P.lowRange = 0.000000;
+P.highRange = 1.000000;
+P.fuzziness = 0.00;
+P.smoothness = 0.00;
+P.screening = false;
+P.toLightness = true;
+P.invert = false;

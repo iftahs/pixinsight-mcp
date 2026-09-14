@@ -1,0 +1,60 @@
+var P = new SubframeSelector;
+P.routine = SubframeSelector.MeasureSubframes;
+P.nonInteractive = false;
+P.subframes = [ // subframeEnabled, subframePath, localNormalizationDataPath, drizzlePath
+];
+P.fileCache = true;
+P.subframeScale = 1.0000;
+P.cameraGain = 1.0000;
+P.cameraResolution = SubframeSelector.Bits16;
+P.siteLocalMidnight = 24;
+P.scaleUnit = SubframeSelector.ArcSeconds;
+P.dataUnit = SubframeSelector.Normalized;
+P.trimmingFactor = 0.10;
+P.structureLayers = 5;
+P.noiseLayers = 0;
+P.hotPixelFilterRadius = 1;
+P.noiseReductionFilterRadius = 0;
+P.minStructureSize = 0;
+P.sensitivity = 0.50;
+P.peakResponse = 0.50;
+P.brightThreshold = 3.00;
+P.maxDistortion = 0.60;
+P.allowClusteredSources = false;
+P.upperLimit = 1.0000;
+P.psfFit = SubframeSelector.Moffat4;
+P.psfFitCircular = false;
+P.maxPSFFits = 8000;
+P.roiX0 = 0;
+P.roiY0 = 0;
+P.roiX1 = 0;
+P.roiY1 = 0;
+P.noNoiseAndSignalWarnings = false;
+P.pedestalMode = SubframeSelector.Pedestal_Keyword;
+P.pedestal = 0;
+P.pedestalKeyword = "";
+P.inputHints = "";
+P.outputHints = "";
+P.outputDirectory = "";
+P.outputExtension = ".xisf";
+P.outputPrefix = "";
+P.outputPostfix = "_a";
+P.outputKeyword = "SSWEIGHT";
+P.generateHistoryProperties = true;
+P.overwriteExistingFiles = false;
+P.onError = SubframeSelector.Continue;
+P.approvalExpression = "";
+P.weightingExpression = "";
+P.sortProperty = SubframeSelector.Sort_Index;
+P.graphProperty = SubframeSelector.GraphProperty_PSFSignalWeight;
+P.auxGraphProperty = SubframeSelector.AuxGraphProperty_Weight;
+P.useFileThreads = true;
+P.fileThreadOverload = 1.00;
+P.maxFileReadThreads = 0;
+P.maxFileWriteThreads = 0;
+/*
+ * Read-only properties
+ *
+P.measurements = [ // index, enabled, locked, filePath, weight, FWHM, eccentricity, PSFSignalWeight, unused01, SNRWeight, median, medianMeanDev, noise, noiseRatio, stars, starResidual, FWHMMeanDev, eccentricityMeanDev, starResidualMeanDev, azimuth, altitude, PSFFlux, PSFFluxPower, PSFTotalMeanFlux, PSFTotalMeanPowerFlux, PSFCount, MStar, NStar, PSFSNR, PSFScale, PSFScaleSNR
+];
+ */

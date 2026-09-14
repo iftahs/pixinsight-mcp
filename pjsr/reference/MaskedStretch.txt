@@ -1,0 +1,13 @@
+var P = new MaskedStretch;
+P.targetBackground = 0.12500000;
+P.numberOfIterations = 100;
+P.clippingFraction = 0.00050000;
+P.backgroundReferenceViewId = "";
+P.backgroundLow = 0.00000000;
+P.backgroundHigh = 0.05000000;
+P.useROI = false;
+P.roiX0 = 0;
+P.roiY0 = 0;
+P.roiX1 = 0;
+P.roiY1 = 0;
+P.maskType = MaskedStretch.MaskType_Intensity;

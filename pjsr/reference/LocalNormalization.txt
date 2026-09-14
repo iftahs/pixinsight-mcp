@@ -1,0 +1,68 @@
+var P = new LocalNormalization;
+P.scale = 1024;
+P.noScale = false;
+P.globalLocationNormalization = false;
+P.truncate = true;
+P.backgroundSamplingDelta = 32;
+P.rejection = true;
+P.referenceRejection = false;
+P.lowClippingLevel = 0.000045;
+P.highClippingLevel = 0.85;
+P.referenceRejectionThreshold = 3.00;
+P.targetRejectionThreshold = 3.20;
+P.hotPixelFilterRadius = 2;
+P.noiseReductionFilterRadius = 0;
+P.modelScalingFactor = 8.00;
+P.scaleEvaluationMethod = LocalNormalization.ScaleEvaluationMethod_PSFSignal;
+P.localScaleCorrections = false;
+P.psfStructureLayers = 5;
+P.saturationThreshold = 0.75;
+P.saturationRelative = true;
+P.rejectionLimit = 0.30;
+P.psfNoiseLayers = 1;
+P.psfHotPixelFilterRadius = 1;
+P.psfNoiseReductionFilterRadius = 0;
+P.psfMinStructureSize = 0;
+P.psfMinSNR = 40.00;
+P.psfAllowClusteredSources = true;
+P.psfType = LocalNormalization.PSFType_Auto;
+P.psfGrowth = 1.00;
+P.psfMaxStars = 24576;
+P.referencePathOrViewId = "";
+P.referenceIsView = true;
+P.targetItems = [ // enabled, image
+];
+P.inputHints = "";
+P.outputHints = "";
+P.generateNormalizedImages = LocalNormalization.GenerateNormalizedImages_ViewExecutionOnly;
+P.generateNormalizationData = true;
+P.generateInvalidData = false;
+P.generateHistoryProperties = true;
+P.showBackgroundModels = false;
+P.showLocalScaleModels = false;
+P.showRejectionMaps = false;
+P.showStructureMaps = false;
+P.plotNormalizationFunctions = LocalNormalization.PlotNormalizationFunctions_DontPlot;
+P.noGUIMessages = true;
+P.autoMemoryLimit = 0.85;
+P.outputDirectory = "";
+P.outputExtension = ".xisf";
+P.outputPrefix = "";
+P.outputPostfix = "_n";
+P.overwriteExistingFiles = false;
+P.onError = LocalNormalization.OnError_Continue;
+P.useFileThreads = true;
+P.fileThreadOverload = 1.00;
+P.maxFileReadThreads = 0;
+P.maxFileWriteThreads = 0;
+P.graphSize = 1024;
+P.graphTextSize = 12;
+P.graphTitleSize = 18;
+P.graphTransparent = false;
+P.graphOutputDirectory = "";
+/*
+ * Read-only properties
+ *
+P.outputData = [ // outputFilePathXNML, outputFilePath, scaleFactorRK, scaleFactorG, scaleFactorB, valid
+];
+ */

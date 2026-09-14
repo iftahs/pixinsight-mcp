@@ -1,0 +1,9 @@
+var P = new ChannelExtraction;
+P.colorSpace = ChannelExtraction.RGB;
+P.channels = [ // enabled, id
+   [true, ""],
+   [true, ""],
+   [true, ""]
+];
+P.sampleFormat = ChannelExtraction.SameAsSource;
+P.inheritAstrometricSolution = true;

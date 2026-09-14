@@ -1,0 +1,17 @@
+var P = new SplitCFA;
+P.targetFrames = [ // enabled, path, folder
+];
+P.outputTree = true;
+P.outputSubDirCFA = true;
+P.outputDir = "";
+P.prefix = "";
+P.postfix = "_CFA";
+P.overwrite = false;
+/*
+ * Read-only properties
+ *
+P.outputViewId0 = "";
+P.outputViewId1 = "";
+P.outputViewId2 = "";
+P.outputViewId3 = "";
+ */

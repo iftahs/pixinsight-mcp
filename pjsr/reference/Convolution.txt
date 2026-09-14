@@ -1,0 +1,9 @@
+var P = new Convolution;
+P.mode = Convolution.Parametric;
+P.sigma = 2.00;
+P.shape = 2.00;
+P.aspectRatio = 1.00;
+P.rotationAngle = 0.00;
+P.filterSource = "";
+P.rescaleHighPass = false;
+P.viewId = "";

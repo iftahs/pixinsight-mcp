@@ -1,0 +1,17 @@
+var P = new MultiscaleAdaptiveStretch;
+P.aggressiveness = 0.70;
+P.targetBackground = 0.150;
+P.dynamicRangeCompression = 0.40;
+P.contrastRecovery = true;
+P.scaleSeparation = 1024;
+P.contrastRecoveryIntensity = 1.000;
+P.previewLargeScale = false;
+P.saturationEnabled = true;
+P.saturationAmount = 0.75;
+P.saturationBoost = 0.50;
+P.saturationLightnessMask = true;
+P.backgroundROIEnabled = false;
+P.backgroundROIX0 = 0;
+P.backgroundROIY0 = 0;
+P.backgroundROIWidth = 0;
+P.backgroundROIHeight = 0;

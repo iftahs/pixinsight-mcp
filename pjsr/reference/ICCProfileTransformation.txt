@@ -1,0 +1,6 @@
+var P = new ICCProfileTransformation;
+P.targetProfile = "";
+P.toDefaultProfile = true;
+P.renderingIntent = ICCProfileTransformation.RelativeColorimetric;
+P.useBlackPointCompensation = false;
+P.useFloatingPointTransformation = true;

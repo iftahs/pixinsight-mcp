@@ -1,0 +1,5 @@
+var P = new ExtractAlphaChannels;
+P.channels = ExtractAlphaChannels.AllAlphaChannels;
+P.channelList = "0";
+P.extract = true;
+P.delete = false;

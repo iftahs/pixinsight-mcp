@@ -1,0 +1,330 @@
+{
+  "ImageIntegration": {
+    "present": true,
+    "error": null
+  },
+  "ImageCalibration": {
+    "present": true,
+    "error": null
+  },
+  "CosmeticCorrection": {
+    "present": true,
+    "error": null
+  },
+  "Debayer": {
+    "present": true,
+    "error": null
+  },
+  "SubframeSelector": {
+    "present": true,
+    "error": null
+  },
+  "StarAlignment": {
+    "present": true,
+    "error": null
+  },
+  "LocalNormalization": {
+    "present": true,
+    "error": null
+  },
+  "DrizzleIntegration": {
+    "present": true,
+    "error": null
+  },
+  "FastIntegration": {
+    "present": true,
+    "error": null
+  },
+  "HistogramTransformation": {
+    "present": true,
+    "error": null
+  },
+  "ScreenTransferFunction": {
+    "present": true,
+    "error": null
+  },
+  "Resample": {
+    "present": true,
+    "error": null
+  },
+  "IntegerResample": {
+    "present": true,
+    "error": null
+  },
+  "DynamicCrop": {
+    "present": true,
+    "error": null
+  },
+  "Crop": {
+    "present": true,
+    "error": null
+  },
+  "PixelMath": {
+    "present": true,
+    "error": null
+  },
+  "GradientCorrection": {
+    "present": true,
+    "error": null
+  },
+  "AutomaticBackgroundExtractor": {
+    "present": true,
+    "error": null
+  },
+  "DynamicBackgroundExtraction": {
+    "present": true,
+    "error": null
+  },
+  "SpectrophotometricColorCalibration": {
+    "present": true,
+    "error": null
+  },
+  "PhotometricColorCalibration": {
+    "present": true,
+    "error": null
+  },
+  "ColorCalibration": {
+    "present": true,
+    "error": null
+  },
+  "BackgroundNeutralization": {
+    "present": true,
+    "error": null
+  },
+  "Deconvolution": {
+    "present": true,
+    "error": null
+  },
+  "MultiscaleLinearTransform": {
+    "present": true,
+    "error": null
+  },
+  "MultiscaleMedianTransform": {
+    "present": true,
+    "error": null
+  },
+  "TGVDenoise": {
+    "present": true,
+    "error": null
+  },
+  "ArcsinhStretch": {
+    "present": true,
+    "error": null
+  },
+  "MultiscaleAdaptiveStretch": {
+    "present": true,
+    "error": null
+  },
+  "CurvesTransformation": {
+    "present": true,
+    "error": null
+  },
+  "ColorSaturation": {
+    "present": true,
+    "error": null
+  },
+  "SCNR": {
+    "present": true,
+    "error": null
+  },
+  "StarMask": {
+    "present": true,
+    "error": null
+  },
+  "RangeMask": {
+    "present": false,
+    "error": "ReferenceError: RangeMask is not defined"
+  },
+  "RangeSelection": {
+    "present": true,
+    "error": null
+  },
+  "ChannelExtraction": {
+    "present": true,
+    "error": null
+  },
+  "ChannelCombination": {
+    "present": true,
+    "error": null
+  },
+  "LinearFit": {
+    "present": true,
+    "error": null
+  },
+  "MorphologicalTransformation": {
+    "present": true,
+    "error": null
+  },
+  "Convolution": {
+    "present": true,
+    "error": null
+  },
+  "UnsharpMask": {
+    "present": true,
+    "error": null
+  },
+  "HDRMultiscaleTransform": {
+    "present": true,
+    "error": null
+  },
+  "LocalHistogramEqualization": {
+    "present": true,
+    "error": null
+  },
+  "Binarize": {
+    "present": true,
+    "error": null
+  },
+  "Invert": {
+    "present": true,
+    "error": null
+  },
+  "ConvertToRGBColor": {
+    "present": true,
+    "error": null
+  },
+  "ConvertToGrayscale": {
+    "present": true,
+    "error": null
+  },
+  "Statistics": {
+    "present": true,
+    "error": null
+  },
+  "NoiseGenerator": {
+    "present": true,
+    "error": null
+  },
+  "ATrousWaveletTransform": {
+    "present": true,
+    "error": null
+  },
+  "ExponentialTransformation": {
+    "present": true,
+    "error": null
+  },
+  "BlurXTerminator": {
+    "present": false,
+    "error": "ReferenceError: BlurXTerminator is not defined"
+  },
+  "NoiseXTerminator": {
+    "present": false,
+    "error": "ReferenceError: NoiseXTerminator is not defined"
+  },
+  "StarXTerminator": {
+    "present": false,
+    "error": "ReferenceError: StarXTerminator is not defined"
+  },
+  "StarNet": {
+    "present": false,
+    "error": "ReferenceError: StarNet is not defined"
+  },
+  "StarNet2": {
+    "present": false,
+    "error": "ReferenceError: StarNet2 is not defined"
+  },
+  "GraXpert": {
+    "present": false,
+    "error": "ReferenceError: GraXpert is not defined"
+  },
+  "GeometricTransformation": {
+    "present": false,
+    "error": "ReferenceError: GeometricTransformation is not defined"
+  },
+  "FastRotation": {
+    "present": true,
+    "error": null
+  },
+  "Rotation": {
+    "present": true,
+    "error": null
+  },
+  "DynamicPSF": {
+    "present": true,
+    "error": null
+  },
+  "ImageIdentifier": {
+    "present": true,
+    "error": null
+  },
+  "NewImage": {
+    "present": true,
+    "error": null
+  },
+  "CreateAlphaChannels": {
+    "present": true,
+    "error": null
+  },
+  "ExtractAlphaChannels": {
+    "present": true,
+    "error": null
+  },
+  "MaskedStretch": {
+    "present": true,
+    "error": null
+  },
+  "GeneralizedHyperbolicStretch": {
+    "present": false,
+    "error": "ReferenceError: GeneralizedHyperbolicStretch is not defined"
+  },
+  "CometAlignment": {
+    "present": true,
+    "error": null
+  },
+  "SplitCFA": {
+    "present": true,
+    "error": null
+  },
+  "MergeCFA": {
+    "present": true,
+    "error": null
+  },
+  "Superbias": {
+    "present": true,
+    "error": null
+  },
+  "ColorManagement": {
+    "present": false,
+    "error": "ReferenceError: ColorManagement is not defined"
+  },
+  "ICCProfileTransformation": {
+    "present": true,
+    "error": null
+  },
+  "AssignICCProfile": {
+    "present": true,
+    "error": null
+  },
+  "ReadoutOptions": {
+    "present": true,
+    "error": null
+  },
+  "Annotation": {
+    "present": true,
+    "error": null
+  },
+  "Blink": {
+    "present": true,
+    "error": null
+  },
+  "CloneStamp": {
+    "present": true,
+    "error": null
+  },
+  "LRGBCombination": {
+    "present": true,
+    "error": null
+  },
+  "LarsonSekanina": {
+    "present": true,
+    "error": null
+  },
+  "RGBWorkingSpace": {
+    "present": true,
+    "error": null
+  },
+  "SampleFormatConversion": {
+    "present": true,
+    "error": null
+  }
+}

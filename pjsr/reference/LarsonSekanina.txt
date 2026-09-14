@@ -1,0 +1,14 @@
+var P = new LarsonSekanina;
+P.interpolation = LarsonSekanina.Bicubic;
+P.radiusIncrement = 1.000;
+P.angleIncrement = 1.000;
+P.centerX = 0.000;
+P.centerY = 0.000;
+P.amount = 0.100;
+P.threshold = 0.0000000;
+P.deringing = 0.00;
+P.rangeLow = 0.0000000;
+P.rangeHigh = 0.0000000;
+P.useLuminance = true;
+P.highPass = false;
+P.disableExtension = false;

@@ -1,0 +1,14 @@
+var P = new Resample;
+P.xSize = 1.0000;
+P.ySize = 1.0000;
+P.mode = Resample.RelativeDimensions;
+P.absoluteMode = Resample.ForceWidthAndHeight;
+P.xResolution = 72.000;
+P.yResolution = 72.000;
+P.metric = false;
+P.forceResolution = false;
+P.interpolation = Resample.Auto;
+P.clampingThreshold = 0.30;
+P.smoothness = 1.50;
+P.gammaCorrection = false;
+P.noGUIMessages = false;

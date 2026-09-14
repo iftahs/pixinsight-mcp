@@ -1,0 +1,6 @@
+var P = new LocalHistogramEqualization;
+P.radius = 64;
+P.histogramBins = LocalHistogramEqualization.Bit8;
+P.slopeLimit = 2.0;
+P.amount = 1.000;
+P.circularKernel = true;

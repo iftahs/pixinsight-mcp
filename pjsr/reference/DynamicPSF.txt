@@ -1,0 +1,37 @@
+var P = new DynamicPSF;
+P.views = [ // id
+];
+P.stars = [ // viewIndex, channel, status, x0, y0, x1, y1, x, y
+];
+P.psf = [ // starIndex, function, circular, status, B, A, cx, cy, sx, sy, theta, beta, mad, celestial, alpha, delta, flux, meanSignal
+];
+P.autoPSF = true;
+P.circularPSF = false;
+P.gaussianPSF = true;
+P.moffatPSF = false;
+P.moffat10PSF = false;
+P.moffat8PSF = false;
+P.moffat6PSF = false;
+P.moffat4PSF = false;
+P.moffat25PSF = false;
+P.moffat15PSF = false;
+P.lorentzianPSF = false;
+P.variableShapePSF = false;
+P.autoVariableShapePSF = false;
+P.betaMin = 1.00;
+P.betaMax = 4.00;
+P.signedAngles = true;
+P.regenerate = true;
+P.astrometry = true;
+P.astrometryPrecision = 2;
+P.searchRadius = 8;
+P.threshold = 1.00;
+P.autoAperture = true;
+P.scaleMode = DynamicPSF.Scale_Pixels;
+P.scaleValue = 1.00;
+P.scaleKeyword = "";
+P.starColor = 4292927712;
+P.selectedStarColor = 4278255360;
+P.selectedStarFillColor = 0;
+P.badStarColor = 4294901760;
+P.badStarFillColor = 2164195328;

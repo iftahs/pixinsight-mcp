@@ -1,0 +1,36 @@
+var P = new DynamicBackgroundExtraction;
+P.data = [ // x, y, z0, w0, z1, w1, z2, w2
+];
+P.numberOfChannels = 1;
+P.derivativeOrder = 2;
+P.smoothing = 0.250;
+P.ignoreWeights = false;
+P.modelId = "";
+P.modelWidth = 0;
+P.modelHeight = 0;
+P.downsample = 2;
+P.modelSampleFormat = DynamicBackgroundExtraction.f32;
+P.targetCorrection = DynamicBackgroundExtraction.None;
+P.normalize = false;
+P.discardModel = false;
+P.replaceTarget = false;
+P.correctedImageId = "";
+P.correctedImageSampleFormat = DynamicBackgroundExtraction.SameAsTarget;
+P.samples = [ // x, y, radius, symmetries, axialCount, isFixed, z0, w0, z1, w1, z2, w2
+];
+P.imageWidth = 0;
+P.imageHeight = 0;
+P.symmetryCenterX = 0.500000;
+P.symmetryCenterY = 0.500000;
+P.tolerance = 0.500;
+P.shadowsRelaxation = 3.000;
+P.minSampleFraction = 0.050;
+P.defaultSampleRadius = 5;
+P.samplesPerRow = 10;
+P.minWeight = 0.750;
+P.sampleColor = 4292927712;
+P.selectedSampleColor = 4278255360;
+P.selectedSampleFillColor = 0;
+P.badSampleColor = 4294901760;
+P.badSampleFillColor = 2164195328;
+P.axisColor = 4292927712;

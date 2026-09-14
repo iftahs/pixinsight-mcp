@@ -1,0 +1,25 @@
+var P = new CosmeticCorrection;
+P.targetFrames = [ // enabled, path
+];
+P.masterDarkPath = "";
+P.outputDir = "";
+P.outputExtension = ".xisf";
+P.prefix = "";
+P.postfix = "_cc";
+P.generateHistoryProperties = false;
+P.overwrite = false;
+P.amount = 1.00;
+P.cfa = false;
+P.useMasterDark = false;
+P.hotDarkCheck = false;
+P.hotDarkLevel = 1.0000000;
+P.coldDarkCheck = false;
+P.coldDarkLevel = 0.0000000;
+P.useAutoDetect = false;
+P.hotAutoCheck = false;
+P.hotAutoValue = 3.0;
+P.coldAutoCheck = false;
+P.coldAutoValue = 3.0;
+P.useDefectList = false;
+P.defects = [ // defectEnabled, defectIsRow, defectAddress, defectIsRange, defectBegin, defectEnd
+];

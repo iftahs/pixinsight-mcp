@@ -1,0 +1,9 @@
+var P = new RGBWorkingSpace;
+P.channels = [ // Y, x, y
+   [0.222491, 0.648431, 0.330856],
+   [0.716888, 0.321152, 0.597871],
+   [0.060621, 0.155886, 0.066044]
+];
+P.gamma = 2.20;
+P.sRGBGamma = true;
+P.applyGlobalRGBWS = false;

@@ -1,0 +1,5 @@
+var P = new Binarize;
+P.thresholdRK = 0.50000000;
+P.thresholdG = 0.50000000;
+P.thresholdB = 0.50000000;
+P.isGlobal = true;

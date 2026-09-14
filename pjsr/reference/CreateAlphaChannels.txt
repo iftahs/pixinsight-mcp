@@ -1,0 +1,8 @@
+var P = new CreateAlphaChannels;
+P.fromImage = true;
+P.sourceId = "";
+P.invertSource = false;
+P.closeSource = false;
+P.transparency = 1.00000000;
+P.replace = false;
+P.count = 1;

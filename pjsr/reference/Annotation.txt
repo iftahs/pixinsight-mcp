@@ -1,0 +1,15 @@
+var P = new Annotation;
+P.annotationText = "Annotation";
+P.annotationFont = "Segoe UI";
+P.annotationFontSize = 12;
+P.annotationFontBold = false;
+P.annotationFontItalic = false;
+P.annotationFontUnderline = false;
+P.annotationFontShadow = false;
+P.annotationColor = 4290822336;
+P.annotationPositionX = 0;
+P.annotationPositionY = 0;
+P.annotationShowLeader = false;
+P.annotationLeaderPositionX = 0;
+P.annotationLeaderPositionY = 0;
+P.annotationOpacity = 255;

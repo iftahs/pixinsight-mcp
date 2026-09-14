@@ -1,0 +1,10 @@
+var P = new MergeCFA;
+P.sourceCFAImage0 = "";
+P.sourceCFAImage1 = "";
+P.sourceCFAImage2 = "";
+P.sourceCFAImage3 = "";
+/*
+ * Read-only properties
+ *
+P.outputViewId = "";
+ */

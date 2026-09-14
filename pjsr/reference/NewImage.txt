@@ -1,0 +1,11 @@
+var P = new NewImage;
+P.id = "";
+P.width = 1024;
+P.height = 1024;
+P.numberOfChannels = 1;
+P.colorSpace = NewImage.Grayscale;
+P.sampleFormat = NewImage.f32;
+P.v0 = 0.00000000;
+P.v1 = 0.00000000;
+P.v2 = 0.00000000;
+P.va = 1.00000000;

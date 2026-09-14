@@ -1,0 +1,9 @@
+var P = new CloneStamp;
+P.cloner = [ // actionIndex, targetX, targetY
+];
+P.actions = [ // sourceId, sourceWidth, sourceHeight, sourceX, sourceY, radius, softness, opacity
+];
+P.width = 0;
+P.height = 0;
+P.clonerColor = 4292927712;
+P.boundsColor = 4292927712;

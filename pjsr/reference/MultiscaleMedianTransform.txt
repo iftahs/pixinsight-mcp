@@ -1,0 +1,23 @@
+var P = new MultiscaleMedianTransform;
+P.layers = [ // enabled, biasEnabled, bias, noiseReductionEnabled, noiseReductionThreshold, noiseReductionAmount, noiseReductionAdaptive
+   [true, true, 0.000, false, 1.0000, 1.00, 0.0000],
+   [true, true, 0.000, false, 1.0000, 1.00, 0.0000],
+   [true, true, 0.000, false, 1.0000, 1.00, 0.0000],
+   [true, true, 0.000, false, 1.0000, 1.00, 0.0000],
+   [true, true, 0.000, false, 1.0000, 1.00, 0.0000]
+];
+P.transform = MultiscaleMedianTransform.MultiscaleMedianTransform;
+P.medianWaveletThreshold = 5.00;
+P.scaleDelta = 0;
+P.linearMask = false;
+P.linearMaskAmpFactor = 100;
+P.linearMaskSmoothness = 1.00;
+P.linearMaskInverted = true;
+P.linearMaskPreview = false;
+P.lowRange = 0.0000;
+P.highRange = 0.0000;
+P.previewMode = MultiscaleMedianTransform.Disabled;
+P.previewLayer = 0;
+P.toLuminance = true;
+P.toChrominance = true;
+P.linear = false;

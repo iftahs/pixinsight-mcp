@@ -1,0 +1,9 @@
+var P = new IntegerResample;
+P.zoomFactor = -2;
+P.downsamplingMode = IntegerResample.Average;
+P.xResolution = 72.000;
+P.yResolution = 72.000;
+P.metric = false;
+P.forceResolution = false;
+P.gammaCorrection = false;
+P.noGUIMessages = false;

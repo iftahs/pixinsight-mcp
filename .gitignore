@@ -1,0 +1,9 @@
+node_modules/
+dist/
+workdir/
+tests/fixtures/data/
+*.log
+.DS_Store
+pixinsight-mcp.config.local.json
+pjsr/generated/
+pixinsight-mcp.config.json

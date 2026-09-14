@@ -1,0 +1,4 @@
+var P = new LinearFit;
+P.referenceViewId = "";
+P.rejectLow = 0.000000;
+P.rejectHigh = 0.920000;

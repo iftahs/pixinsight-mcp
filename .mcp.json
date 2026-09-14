@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pixinsight": {
+      "command": "npx",
+      "args": ["tsx", "E:/dev-projects/pixinsight-mcp/src/index.ts"],
+      "env": {
+        "PIMCP_CONFIG": "E:/dev-projects/pixinsight-mcp/pixinsight-mcp.config.json"
+      }
+    }
+  }
+}

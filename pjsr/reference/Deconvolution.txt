@@ -1,0 +1,38 @@
+var P = new Deconvolution;
+P.algorithm = Deconvolution.RichardsonLucy;
+P.numberOfIterations = 10;
+P.deringing = false;
+P.deringingDark = 0.1000;
+P.deringingBright = 0.0000;
+P.deringingSupport = false;
+P.deringingSupportAmount = 0.70;
+P.deringingSupportViewId = "";
+P.toLuminance = true;
+P.psfMode = Deconvolution.Parametric;
+P.psfSigma = 2.00;
+P.psfShape = 2.00;
+P.psfAspectRatio = 1.00;
+P.psfRotationAngle = 0.00;
+P.psfMotionLength = 5.00;
+P.psfMotionRotationAngle = 0.00;
+P.psfViewId = "";
+P.psfFFTSizeLimit = 15;
+P.useRegularization = true;
+P.waveletLayers = [ // noiseThreshold, noiseReduction
+   [3.00, 1.00],
+   [2.00, 0.70],
+   [1.00, 0.70],
+   [1.00, 0.70],
+   [1.00, 0.70]
+];
+P.noiseModel = Deconvolution.Gaussian;
+P.numberOfWaveletLayers = 2;
+P.scalingFunction = Deconvolution.B3Spline5x5;
+P.convergence = 0.0000;
+P.rangeLow = 0.0000000;
+P.rangeHigh = 0.0000000;
+P.iterations = [ // count
+   [0],
+   [0],
+   [0]
+];

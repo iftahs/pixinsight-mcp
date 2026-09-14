@@ -1,0 +1,56 @@
+var P = new CurvesTransformation;
+P.R = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.Rt = CurvesTransformation.AkimaSubsplines;
+P.G = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.Gt = CurvesTransformation.AkimaSubsplines;
+P.B = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.Bt = CurvesTransformation.AkimaSubsplines;
+P.K = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.Kt = CurvesTransformation.AkimaSubsplines;
+P.A = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.At = CurvesTransformation.AkimaSubsplines;
+P.L = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.Lt = CurvesTransformation.AkimaSubsplines;
+P.a = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.at = CurvesTransformation.AkimaSubsplines;
+P.b = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.bt = CurvesTransformation.AkimaSubsplines;
+P.c = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.ct = CurvesTransformation.AkimaSubsplines;
+P.H = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.Ht = CurvesTransformation.AkimaSubsplines;
+P.S = [ // x, y
+   [0.00000, 0.00000],
+   [1.00000, 1.00000]
+];
+P.St = CurvesTransformation.AkimaSubsplines;

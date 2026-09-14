@@ -1,0 +1,15 @@
+var P = new Crop;
+P.leftMargin = 0;
+P.topMargin = 0;
+P.rightMargin = 0;
+P.bottomMargin = 0;
+P.mode = Crop.AbsolutePixels;
+P.xResolution = 72.000;
+P.yResolution = 72.000;
+P.metric = false;
+P.forceResolution = false;
+P.red = 0.000000;
+P.green = 0.000000;
+P.blue = 0.000000;
+P.alpha = 1.000000;
+P.noGUIMessages = false;

@@ -1,0 +1,3 @@
+var P = new AssignICCProfile;
+P.targetProfile = "";
+P.mode = AssignICCProfile.AssignDefaultProfile;

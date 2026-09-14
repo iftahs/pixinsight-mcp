@@ -1,0 +1,14 @@
+var P = new LRGBCombination;
+P.channels = [ // enabled, id, k
+   [true, "", 1.00000],
+   [true, "", 1.00000],
+   [true, "", 1.00000],
+   [true, "", 1.00000]
+];
+P.mL = 0.500;
+P.mc = 0.500;
+P.clipHighlights = true;
+P.noiseReduction = false;
+P.layersRemoved = 4;
+P.layersProtected = 2;
+P.inheritAstrometricSolution = true;

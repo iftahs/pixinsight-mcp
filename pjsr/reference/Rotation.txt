@@ -1,0 +1,12 @@
+var P = new Rotation;
+P.angle = 0.0000000000;
+P.optimizeFast = true;
+P.interpolation = Rotation.Auto;
+P.clampingThreshold = 0.30;
+P.smoothness = 1.50;
+P.gammaCorrection = false;
+P.red = 0.000000;
+P.green = 0.000000;
+P.blue = 0.000000;
+P.alpha = 1.000000;
+P.noGUIMessages = false;
