@@ -1,5 +1,5 @@
 // End-to-end tests against a real PixInsight. Skipped unless PI_INTEGRATION=1.
-// Uses the synthetic fixtures (128×96 RGGB) so a full run finishes in well under two minutes.
+// Uses the synthetic fixtures (192×128 RGGB) so a full run finishes in well under two minutes.
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import os from "node:os";
 import path from "node:path";
@@ -76,11 +76,14 @@ d("pixinsight-mcp end to end (fixtures)", () => {
       expect(c.median).toBeGreaterThan(0);
       expect(c.clipped_low_pct).toBeLessThan(0.05);
     }
-    // Golden: flat-fielded synthetic sky is nearly uniform; corner/centre ratio close to 1 after flat.
-    const centre = await call("image_statistics", { id: st.master_view_id as string, rect: [48, 36, 32, 24] });
-    const corner = await call("image_statistics", { id: st.master_view_id as string, rect: [2, 2, 24, 18] });
-    const ratio = (corner.channels as Array<{ median: number }>)[1].median / (centre.channels as Array<{ median: number }>)[1].median;
-    expect(ratio).toBeGreaterThan(0.8);
+    // Golden: the synthetic sky has 35 % corner vignetting that the master flat must remove.
+    // Compare a corner background patch with a top-middle background patch (both away from the galaxy):
+    // uncorrected ratio ≈ 0.5, flat-fielded ≈ 1.
+    const mid = await call("image_statistics", { id: st.master_view_id as string, rect: [84, 4, 24, 12] });
+    const corner = await call("image_statistics", { id: st.master_view_id as string, rect: [4, 4, 20, 14] });
+    const ratio = (corner.channels as Array<{ median: number }>)[1].median / (mid.channels as Array<{ median: number }>)[1].median;
+    expect(ratio, `corner/mid background ratio ${ratio}`).toBeGreaterThan(0.8);
+    expect(ratio).toBeLessThan(1.25);
     // Master library populated
     const masters = await call("list_masters", {});
     expect((masters.masters as unknown[]).length).toBeGreaterThanOrEqual(3);

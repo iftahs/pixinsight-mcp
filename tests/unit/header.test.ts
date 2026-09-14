@@ -38,7 +38,7 @@ describe("header reader", () => {
     expect(num(h, "EXPTIME", "EXPOSURE")).toBe(180);
     expect(str(h, "IMAGETYP")).toBe("Light");
     expect(str(h, "BAYERPAT")).toBe("RGGB");
-    expect(num(h, "NAXIS1")).toBe(128);
+    expect(num(h, "NAXIS1")).toBe(192);
   });
 
   it("rejects a non-FITS buffer", () => {

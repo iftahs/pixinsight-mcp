@@ -47,8 +47,8 @@ function gauss(r: () => number): number {
 
 /** Build a synthetic frame as a Uint16 (unsigned via BZERO) array. */
 export function synthPixels(spec: FrameSpec): Uint16Array {
-  const W = spec.width ?? 128;
-  const H = spec.height ?? 96;
+  const W = spec.width ?? 192;
+  const H = spec.height ?? 128;
   const r = rng(spec.seed);
   const hot = rng(12345); // fixed hot pixel map for the "camera"
   const px = new Float64Array(W * H);
@@ -79,10 +79,10 @@ export function synthPixels(spec: FrameSpec): Uint16Array {
         }
       }
     if (spec.type === "Light") {
-      const sr = rng(777 + (spec.seed % 3)); // stars: same field, tiny dither per frame
+      const sr = rng(777); // stars: identical field for every frame, only a small dither offset per frame
       const dx = (spec.seed % 5) * 0.7;
       const dy = (spec.seed % 7) * 0.5;
-      for (let k = 0; k < 60; ++k) {
+      for (let k = 0; k < 140; ++k) {
         const sx = sr() * W + dx;
         const sy = sr() * H + dy;
         const amp = 400 + 6000 * sr() ** 3;
@@ -98,8 +98,8 @@ export function synthPixels(spec: FrameSpec): Uint16Array {
 }
 
 export function writeFits(file: string, spec: FrameSpec): void {
-  const W = spec.width ?? 128;
-  const H = spec.height ?? 96;
+  const W = spec.width ?? 192;
+  const H = spec.height ?? 128;
   const pixels = synthPixels(spec);
   const cards = [
     card("SIMPLE", true, "file does conform to FITS standard"),
