@@ -28,7 +28,7 @@ d("pixinsight-mcp end to end (fixtures)", () => {
       command: "npx",
       args: ["tsx", "src/index.ts"],
       cwd: process.cwd(),
-      env: { ...process.env, PIMCP_DATA_ROOT: dataRoot, PIMCP_WORKDIR: workdir, PIMCP_REQUIRE_FLATS: "true" },
+      env: { ...process.env, PIMCP_DATA_ROOT: dataRoot, PIMCP_WORKDIR: workdir, PIMCP_REQUIRE_FLATS: "true", PIMCP_CONFIG: path.join(tmp, "none.json") },
       stderr: "inherit",
     });
     client = new Client({ name: "e2e", version: "0.0.1" });
@@ -60,7 +60,7 @@ d("pixinsight-mcp end to end (fixtures)", () => {
   });
 
   it("runs the whole pipeline to a master light and the stats are sane", async () => {
-    const start = await call("pipeline_run", { light_group_id: "light_01", skip_local_normalization: true });
+    const start = await call("pipeline_run", { light_group_id: "light_01", engine: "native", skip_local_normalization: true, keep_intermediates: true });
     expect(start.pipeline_id).toBeTruthy();
     let st: Record<string, unknown> = {};
     const t0 = Date.now();

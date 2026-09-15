@@ -110,7 +110,7 @@ and used by the `process-session` prompt). Install it as a Claude skill for best
 | Intermediates deleted as soon as the next stage succeeds; `cleanup_working_files` for the rest | `keepIntermediates: false` |
 | Post-processing style: DBE (auto samples), denoise, MaskedStretch (small stars), colour, project save + 16-bit TIFF | see `skill/SKILL.md` |
 
-## Tools (95)
+## Tools (92)
 
 **Session** `pi_status` `pi_capabilities` `pi_start_session` `pi_list_sessions` `pi_use_session`
 `pi_end_session` `pi_console_log` `pi_run_pjsr` `pi_restart` `pi_stop`

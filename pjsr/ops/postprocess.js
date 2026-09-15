@@ -653,7 +653,16 @@ PIMCP.ops.dbe_auto = function (args) {
             lum.resetSelections();
             // Reject: local median above background (object/nebulosity) or a star inside (max spike)
             var ok = (m - gMed) < tol * gMad && (mx - m) < 6 * gMad + 0.02;
-            if (ok) samples.push([x, y, radius, 0, 0, false]);
+            if (ok) {
+               // samples row: x, y, radius, symmetries, axialCount, isFixed, z0, w0, z1, w1, z2, w2 (z = per-channel sample value)
+               var row = [x, y, radius, 0, 4, 0];   // symmetries 0, axialCount 3..24 (4), isFixed numeric 0
+               for (var ch = 0; ch < 3; ++ch) {
+                  var z = 0;
+                  if (ch < img.numberOfChannels) { img.selectedChannel = ch; img.selectedRect = rect; z = img.median(); img.resetSelections(); }
+                  row.push(z, 1);
+               }
+               samples.push(row);
+            }
             else rejected.push({ x: x, y: y, reason: (m - gMed) >= tol * gMad ? "object signal" : "star" });
          }
       }
@@ -665,6 +674,8 @@ PIMCP.ops.dbe_auto = function (args) {
       P.imageWidth = W; P.imageHeight = H;
       P.numberOfChannels = img.numberOfChannels;
       P.samples = samples;
+      // Execution uses the data table (normalized 0..1 coordinates); samples is the GUI table.
+      P.data = samples.map(function (r) { return [r[0] / W, r[1] / H, r[6], r[7], r[8], r[9], r[10], r[11]]; });
       P.defaultSampleRadius = radius;
       P.tolerance = Number(args.sample_tolerance === undefined ? 0.5 : args.sample_tolerance);
       P.smoothing = Number(args.smoothing === undefined ? 0.25 : args.smoothing);

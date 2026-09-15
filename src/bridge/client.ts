@@ -48,6 +48,26 @@ export class BridgeClient {
     ensureDirSync(this.layout.bridgeJobs);
     ensureDirSync(this.layout.bridgeResults);
     ensureDirSync(this.layout.bridgeLogs);
+    this.rotateLogs(7);
+  }
+
+  /** Delete bridge job logs/results older than N days (the workdir must stay small). */
+  private rotateLogs(days: number): void {
+    const cutoff = Date.now() - days * 86_400_000;
+    for (const dir of [this.layout.bridgeLogs, this.layout.bridgeResults]) {
+      try {
+        for (const f of fs.readdirSync(dir)) {
+          const p = path.join(dir, f);
+          try {
+            if (fs.statSync(p).mtimeMs < cutoff) fs.unlinkSync(p);
+          } catch {
+            /* ignore */
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    }
   }
 
   get config(): Config {

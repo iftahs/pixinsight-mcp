@@ -200,7 +200,14 @@ export class PipelineRunner {
     if (!fs.existsSync(abs)) return;
     let bytes = 0;
     try {
-      for (const f of fs.readdirSync(abs)) bytes += fs.statSync(path.join(abs, f)).size;
+      const walk = (p: string): void => {
+        for (const e of fs.readdirSync(p, { withFileTypes: true })) {
+          const q = path.join(p, e.name);
+          if (e.isDirectory()) walk(q);
+          else bytes += fs.statSync(q).size;
+        }
+      };
+      walk(abs);
       fs.rmSync(abs, { recursive: true, force: true });
       st.cleanup = st.cleanup ?? { deleted_dirs: [], freed_bytes: 0 };
       st.cleanup.deleted_dirs.push(abs);
