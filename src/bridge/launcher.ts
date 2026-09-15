@@ -138,12 +138,22 @@ export class Launcher {
     const st = await this.status();
     const pid = st.pid;
     if (!pid || !st.pid_alive) return { killed: false, pid };
-    try {
-      if (process.platform === "win32") execFileSync("taskkill", ["/PID", String(pid), "/T", "/F"], { stdio: "ignore" });
-      else process.kill(pid, "SIGKILL");
-    } catch {
-      /* ignore */
+    const attempts: Array<() => void> = process.platform === "win32"
+      ? [
+          () => execFileSync("taskkill", ["/PID", String(pid), "/T", "/F"], { stdio: "ignore" }),
+          () => execFileSync("powershell", ["-NoProfile", "-Command", `Stop-Process -Id ${pid} -Force`], { stdio: "ignore" }),
+        ]
+      : [() => process.kill(pid, "SIGKILL")];
+    for (const attempt of attempts) {
+      try {
+        attempt();
+      } catch {
+        /* try the next method */
+      }
+      for (let i = 0; i < 20 && isPidAlive(pid); i++) await sleep(250);
+      if (!isPidAlive(pid)) break;
     }
+    if (isPidAlive(pid)) throw new BridgeError("KILL_FAILED", `PixInsight pid ${pid} is still running after taskkill/Stop-Process; close it manually`);
     try {
       fs.unlinkSync(this.layout.heartbeat);
     } catch {

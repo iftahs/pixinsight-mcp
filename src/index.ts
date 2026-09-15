@@ -12,6 +12,7 @@ import { registerPostprocessTools } from "./tools/postprocess.js";
 import { registerMaskTools } from "./tools/masks.js";
 import { registerPipelineTools } from "./tools/pipeline.js";
 import { registerReviewTools } from "./tools/review.js";
+import { registerCatalogTools } from "./tools/catalog.js";
 import { registerResources } from "./resources.js";
 import { registerPrompts } from "./prompts.js";
 import { writeGeneratedIncludes } from "./bridge/generated.js";
@@ -35,6 +36,7 @@ export function createServer(ctx: AppContext): McpServer {
   registerMaskTools(server, ctx);
   registerPipelineTools(server, ctx);
   registerReviewTools(server, ctx);
+  registerCatalogTools(server, ctx);
   registerResources(server, ctx);
   registerPrompts(server, ctx);
   return server;

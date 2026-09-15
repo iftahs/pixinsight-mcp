@@ -8,6 +8,7 @@ import { defineTool, imageResult } from "./registry.js";
 import { piPath, readJsonSafe, writeJsonAtomic } from "../util/fsx.js";
 import { loadScan, groupById } from "./inventory.js";
 import { BridgeError } from "../bridge/types.js";
+import { writeProcessingLog } from "./catalog.js";
 
 export interface BlinkMetric {
   index: number;
@@ -97,7 +98,7 @@ export function registerReviewTools(server: McpServer, ctx: AppContext): void {
 
   defineTool(server, {
     name: "save_project",
-    description: "Save the processing 'project': the view as XISF (PixInsight embeds the processing history), companion views (masks/stars), every checkpoint reference and the tool history as manifest.json under <working-files>/project/. PixInsight .xosm projects cannot be written by scripts.",
+    description: "Save the processing 'project': the view as XISF (PixInsight embeds the processing history), companion views (masks/stars), every checkpoint reference and the tool history as manifest.json under <working-files>/project/, plus <working-files>/PROCESSING.md (human-readable log of every step). PixInsight .xosm projects cannot be written by scripts.",
     input: { id: z.string(), name: z.string().optional(), also_views: z.array(z.string()).optional() },
     handler: async ({ id, name, also_views }) => {
       const s = ctx.sessions.ensure();
@@ -109,7 +110,8 @@ export function registerReviewTools(server: McpServer, ctx: AppContext): void {
       const manifest = { saved_at: new Date().toISOString(), session: s.id, target_dir: s.target_dir, main: r.main, companions: r.companions, checkpoints, history, pipeline: ctx.pipelines.list() };
       const mf = path.join(dir, `${(name ?? id).replace(/[^A-Za-z0-9_-]+/g, "_")}.manifest.json`);
       await writeJsonAtomic(mf, manifest);
-      return { ...r, manifest: mf, history_steps: history.length, checkpoints: checkpoints.length };
+      const log = await writeProcessingLog(ctx, name ? `Processing log — ${name}` : undefined);
+      return { ...r, manifest: mf, processing_log: log.path, history_steps: history.length, checkpoints: checkpoints.length };
     },
   });
 }

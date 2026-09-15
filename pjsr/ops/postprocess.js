@@ -113,7 +113,13 @@ PIMCP.ops.plate_solve = function (args) {
    cfg.distortionCorrection = args.distortion_correction !== false;
    cfg.autoMagnitude = true;
    if (args.magnitude !== undefined) { cfg.autoMagnitude = false; cfg.magnitude = Number(args.magnitude); }
-   if (args.catalog) cfg.catalog = String(args.catalog);
+   // Prefer the local Gaia DR3/SP XPSD database when configured (ImageSolver's Automatic mode only probes
+   // DR3/EDR3/DR2 and otherwise falls back to VizieR, which needs a working TLS chain).
+   var localSP = false;
+   try { var gi = new Gaia; gi.command = "get-info"; gi.dataRelease = Gaia.DataRelease_3_SP; gi.executeGlobal(); localSP = !!gi.isValid; } catch (eG) { }
+   if (args.catalog) { cfg.catalog = String(args.catalog); cfg.catalogMode = (/XPSD/i.test(String(args.catalog))) ? CatalogMode.LocalXPSDServer : CatalogMode.Online; }
+   else if (localSP && args.online !== true) { cfg.catalog = "GaiaDR3SP_XPSD"; cfg.catalogMode = CatalogMode.LocalXPSDServer; }
+   else cfg.catalogMode = CatalogMode.Automatic;
    // ImageSolver 6.x (PixInsight 1.9): initialize(window, forceDefaults=false) extracts RA/DEC/FOCALLEN/XPIXSZ from the
    // image metadata; explicit args override afterwards. solveImage() returns void and throws on failure.
    var md = solver.metadata;
@@ -134,7 +140,7 @@ PIMCP.ops.plate_solve = function (args) {
    try { solver.solveImage(w); } catch (e2) { PIMCP.fail("SOLVE_FAILED", String(e2)); }
    if (!w.hasAstrometricSolution) PIMCP.fail("SOLVE_FAILED", "ImageSolver finished without a solution; check ra/dec seed, focal length, pixel size and network access to the Gaia catalog");
    var m = solver.metadata;
-   return { id: v.id, solved: true, cached: false, init_from_headers: initOk, ra: PIMCP.round(m.ra, 6), dec: PIMCP.round(m.dec, 6),
+   return { id: v.id, solved: true, cached: false, catalog: cfg.catalog, local_xpsd: cfg.catalogMode === CatalogMode.LocalXPSDServer, init_from_headers: initOk, ra: PIMCP.round(m.ra, 6), dec: PIMCP.round(m.dec, 6),
             resolution_arcsec_px: PIMCP.round(m.resolution * 3600, 5), focal_mm: m.focal ? PIMCP.round(m.focal, 2) : null,
             summary: w.astrometricSolutionSummary() };
 };
@@ -168,7 +174,7 @@ PIMCP.ops.annotate = function (args) {
    for (i = 0; i < ws.length; ++i) if (!before[ws[i].mainView.id]) out = ws[i];
    if (!out) PIMCP.fail("ANNOTATE_FAILED", "AnnotationEngine produced no output window");
    try {
-      var r = PIMCP.preview.render(out.mainView, { out_path: PIMCP.req(args, "out_path"), max_edge: args.max_edge || 1600, stretch: "none" });
+      var r = PIMCP.preview.render(out.mainView, { out_path: PIMCP.req(args, "out_path"), max_edge: args.max_edge || 1600, stretch: (out.mainView.image.median() < 0.08) ? "stf" : "none" });
       r.id = v.id; r.layers = visible;
       return r;
    } finally { if (!args.keep_window) out.forceClose(); else r.annotated_id = out.mainView.id; }

@@ -108,7 +108,8 @@ and used by the `process-session` prompt). Install it as a Claude skill for best
 | Stacking engine = PixInsight **WBPP** (separate instance, exact matched calibration groups, `platesolve=false`) | `stackingEngine: "wbpp"` (`"native"` for the tool chain), `wbppParams` |
 | Blink review before stacking: `blink_frames` contact sheet, then `exclude_frames` | - |
 | Intermediates deleted as soon as the next stage succeeds; `cleanup_working_files` for the rest | `keepIntermediates: false` |
-| Post-processing style: DBE (auto samples), denoise, MaskedStretch (small stars), colour, project save + 16-bit TIFF | see `skill/SKILL.md` |
+| Post-processing style: DBE (auto samples), denoise, MaskedStretch (small stars), SPCC colour, project save + 16-bit TIFF + `PROCESSING.md` log | see `skill/SKILL.md` |
+| Session bookkeeping (scan, blink, history) lives in `<working-files>/.session/` and is resumed by `pi_start_session { target_dir }` | - |
 
 ## Tools (92)
 
@@ -140,7 +141,9 @@ and used by the `process-session` prompt). Install it as a Claude skill for best
 
 **Orchestration** `pipeline_run` (engine wbpp | native) `pipeline_status` `wbpp_run` `wbpp_status`
 
-**Review / project** `blink_frames` `exclude_frames` `save_project` `cleanup_working_files`
+**Review / project** `blink_frames` `exclude_frames` `save_project` `write_processing_log` `cleanup_working_files`
+
+**Catalogs** `configure_gaia` `gaia_info` (local Gaia DR3/SP XPSD files → offline plate solving + SPCC)
 
 Resources: `pi://session/current`, `pi://previews/{name}`, `pi://jobs/{id}/log`, `pi://masters`,
 `pi://skill`. Prompts: `process-session`, `inspect-frame`.
@@ -211,8 +214,10 @@ PixInsight 1.9.4 — the source of truth for parameter names. Regenerate with
   0 when driven from a script, so subframe weights are computed in Node (`computeWeights`) and
   written into the frames as `SSWEIGHT` by the `write_weights` op.
 - ImageSolver 6.x: `solver.initialize(window, false)` then `solver.solveImage(window)` (throws).
-  Plate solving and SPCC need the Gaia DR3/SP catalog: either the local database files
-  (PixInsight → Resources → Gaia DR3) or a working TLS connection to VizieR.
+  Plate solving and SPCC need the Gaia DR3/SP catalog. Download the DR3/SP "small set"
+  (4 `.xpsd` files, ~11 GB) from pixinsight.com/dist and run `configure_gaia { dir }`; the solver
+  is then pointed at `GaiaDR3SP_XPSD` (ImageSolver's automatic mode only probes DR3/EDR3/DR2 and
+  otherwise falls back to VizieR, which fails on machines with a broken TLS chain).
 
 ## Safety
 

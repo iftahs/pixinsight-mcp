@@ -113,8 +113,9 @@ Linear stage, in this order (preview after every step):
 2. `gradient_correction { method: "DBE" }`: DynamicBackgroundExtraction with automatic samples
    (check `dry_run` sample count first; raise `tolerance` or `samples_per_row` if too few)
 3. `background_neutralize`
-4. `plate_solve` + `color_calibrate { method: "SPCC" }` when a plate solve is possible; otherwise
-   `color_calibrate { method: "ColorCalibration" }`
+4. `plate_solve` + `color_calibrate { method: "SPCC" }` (needs the local Gaia DR3/SP database:
+   check `gaia_info`; install with `configure_gaia { dir }`). Only if no Gaia database and no
+   network: `color_calibrate { method: "ColorCalibration" }`
 5. `deconvolve` only if BlurXTerminator exists (native RL is risky, skip unless asked)
 6. `denoise`: NoiseXTerminator if installed, else native MLT (`strength` 0.3-0.5); check a
    `crop_preview` at 1:1 that stars and galaxy detail survived
@@ -123,8 +124,10 @@ Linear stage, in this order (preview after every step):
 
 Non-linear stage: `scnr` (green), `saturation` (0.2-0.4), `curves { contrast: 0.1-0.2 }`, optional
 `hdr_compress` for the galaxy core, `local_contrast` sparingly, `sharpen` only with a range mask.
-Then `save_project { id, name }` and `save_image { id, format: "tif", bit_depth: 16 }` into
-`working-files/export/`. Report both paths.
+Then `save_project { id, name }` (also writes `working-files/PROCESSING.md`, the human-readable
+record of every step), `save_image { id, format: "tif", bit_depth: 16 }` into
+`working-files/export/`, and `cleanup_working_files { also_checkpoints: true }`. Report the
+TIFF, project and PROCESSING.md paths.
 
 ### Quality gates — check after every stretch or sharpening step
 

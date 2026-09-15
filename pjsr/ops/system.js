@@ -160,3 +160,27 @@ PIMCP.ops.set_screen_stf = function (args) {
    PIMCP.stf.applyToScreen(v, stf);
    return { id: v.id, stf: stf };
 };
+
+/** Register Gaia DR3/SP (or DR3) XPSD database files in PixInsight (persists in settings). */
+PIMCP.ops.configure_gaia = function (args) {
+   var files = PIMCP.req(args, "files");
+   PIMCP.assertFiles(files, "xpsd files");
+   var release = (args.data_release === "DR3") ? Gaia.DataRelease_3 : Gaia.DataRelease_3_SP;
+   var P = new Gaia;
+   P.command = "configure";
+   P.dataRelease = release;
+   P.databaseFilePaths = files.map(function (f) { return [f]; });
+   if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "Gaia configure failed");
+   var Q = new Gaia; Q.command = "get-info"; Q.dataRelease = release;
+   var ok = Q.executeGlobal();
+   var S = new Gaia; S.command = "search"; S.dataRelease = release; S.centerRA = 10.68; S.centerDec = 41.27; S.radius = 0.3; S.magnitudeHigh = 14; S.generateTextOutput = false; S.verbosity = 0;
+   var sOk = S.executeGlobal();
+   return { data_release: args.data_release || "DR3/SP", files: files.length, valid: ok && Q.isValid, magnitude_high: PIMCP.num(Q.databaseMagnitudeHigh), spectra: Q.databaseHasMeanSpectrumData, test_search_sources: sOk ? PIMCP.num(S.sources.length) : null };
+};
+
+PIMCP.ops.gaia_info = function (args) {
+   var release = (args && args.data_release === "DR3") ? Gaia.DataRelease_3 : Gaia.DataRelease_3_SP;
+   var Q = new Gaia; Q.command = "get-info"; Q.dataRelease = release;
+   var ok = false; try { ok = Q.executeGlobal(); } catch (e) { return { configured: false, error: String(e) }; }
+   return { configured: !!(ok && Q.isValid), files: Q.databaseFilePaths.length, magnitude_high: PIMCP.num(Q.databaseMagnitudeHigh), spectra: Q.databaseHasMeanSpectrumData };
+};

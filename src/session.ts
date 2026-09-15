@@ -31,9 +31,10 @@ export class SessionManager {
     ensureDirSync(l.sessions);
     ensureDirSync(l.masters);
     this.statePath = l.state;
-    const st = readJsonSafeSync<{ current?: string }>(this.statePath);
+    const st = readJsonSafeSync<{ current?: string; current_root?: string }>(this.statePath);
     if (st?.current) {
-      const s = this.load(st.current);
+      // Prefer the copy inside the target's working-files (survives workdir cleanup).
+      const s = (st.current_root ? readJsonSafeSync<SessionState>(path.join(st.current_root, "session.json")) : undefined) ?? this.load(st.current);
       if (s) this.current = s;
     }
   }
@@ -44,7 +45,14 @@ export class SessionManager {
   }
 
   private persistCurrent(): void {
-    writeJsonAtomicSync(this.statePath, { current: this.current?.id ?? null, updated_at: nowIso() });
+    writeJsonAtomicSync(this.statePath, { current: this.current?.id ?? null, current_root: this.current?.root ?? null, updated_at: nowIso() });
+  }
+
+  /** Write the session state to its root (and to the workdir index when the root moved into the target). */
+  private persistSession(s: SessionState): void {
+    writeJsonAtomicSync(path.join(s.root, "session.json"), s);
+    const idx = sessionLayout(this.cfg.workdir, s.id).state;
+    if (path.resolve(path.dirname(idx)) !== path.resolve(s.root)) writeJsonAtomicSync(idx, s);
   }
 
   list(): SessionState[] {
@@ -82,7 +90,8 @@ export class SessionManager {
   }
 
   use(id: string): SessionState {
-    const s = this.load(id);
+    const idx = this.load(id);
+    const s = (idx?.root ? readJsonSafeSync<SessionState>(path.join(idx.root, "session.json")) : undefined) ?? idx;
     if (!s) throw new BridgeError("SESSION_NOT_FOUND", `no session ${id}`);
     this.current = s;
     this.persistCurrent();
@@ -102,8 +111,14 @@ export class SessionManager {
   update(mut: (s: SessionState) => void): SessionState {
     const s = this.ensure();
     mut(s);
-    writeJsonAtomicSync(sessionLayout(this.cfg.workdir, s.id).state, s);
+    this.persistSession(s);
     return s;
+  }
+
+  /** Find a session previously attached to this target directory (its .session folder). */
+  static findByTarget(targetDir: string, workingDirName: string): SessionState | undefined {
+    const f = path.join(path.resolve(targetDir), workingDirName, ".session", "session.json");
+    return readJsonSafeSync<SessionState>(f);
   }
 
   end(): SessionState | undefined {
@@ -125,14 +140,31 @@ export class SessionManager {
    */
   useTargetDir(targetDir: string, workingDirName: string): string {
     const work = path.join(path.resolve(targetDir), workingDirName);
+    const root = path.join(work, ".session");
+    for (const d of [work, root, path.join(work, "previews"), path.join(work, "checkpoints"), path.join(work, "pipeline")]) ensureDirSync(d);
+    // Resume the session that already lives next to this target (scan, blink, history…), if any.
+    const existing = readJsonSafeSync<SessionState>(path.join(root, "session.json"));
+    if (existing && (!this.current || this.current.root !== root)) {
+      this.current = existing;
+      this.persistCurrent();
+    }
+    const cur = this.ensure();
+    if (cur.root !== root) {
+      // Move bookkeeping files of the current session into the target's .session folder.
+      for (const f of ["scan.json", "blink.json", "blink-pending.json", "exclusions.json", "history.json", "selection.json", "registration.json", "lnorm.json", "integration.json", "measurements.json"]) {
+        const src = path.join(cur.root, f);
+        if (fs.existsSync(src) && !fs.existsSync(path.join(root, f))) fs.copyFileSync(src, path.join(root, f));
+      }
+    }
     this.update((s) => {
       s.target_dir = path.resolve(targetDir);
+      s.root = root;
       s.work = work;
       s.previews = path.join(work, "previews");
       s.checkpoints = path.join(work, "checkpoints");
       s.pipeline = path.join(work, "pipeline");
     });
-    for (const d of [work, path.join(work, "previews"), path.join(work, "checkpoints"), path.join(work, "pipeline")]) ensureDirSync(d);
+    this.persistCurrent();
     return work;
   }
 

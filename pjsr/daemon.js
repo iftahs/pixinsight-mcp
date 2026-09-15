@@ -117,6 +117,17 @@ function pimcpMain() {
       gc();
    }
 
+   // Single-daemon guard: another instance with a fresh heartbeat owns this bridge → exit (do not race for jobs).
+   try {
+      if (File.exists(heartbeatPath)) {
+         var other = PIMCP.fs.readJson(heartbeatPath);
+         var ageMs = Date.now() - Date.parse(other.ts);
+         if (other.pid !== Number(CoreApplication.pid) && ageMs < 8000) {
+            Console.criticalln("[pimcp] another daemon (pid " + other.pid + ", heartbeat " + Math.round(ageMs / 1000) + " s old) owns " + bridgeDir + " — exiting");
+            return;
+         }
+      }
+   } catch (eLock) { }
    Console.show();
    Console.writeln("<end><cbr><b>pixinsight-mcp daemon " + PIMCP_VERSION + " on PixInsight " + piVersion + "</b>");
    Console.writeln("bridge: " + bridgeDir);
