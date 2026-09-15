@@ -111,7 +111,7 @@ and used by the `process-session` prompt). Install it as a Claude skill for best
 | Post-processing style: DBE (auto samples), denoise, MaskedStretch (small stars), SPCC colour, project save + 16-bit TIFF + `PROCESSING.md` log | see `skill/SKILL.md` |
 | Session bookkeeping (scan, blink, history) lives in `<working-files>/.session/` and is resumed by `pi_start_session { target_dir }` | - |
 
-## Tools (96)
+## Tools (97)
 
 **Session** `pi_status` `pi_capabilities` `pi_start_session` `pi_list_sessions` `pi_use_session`
 `pi_end_session` `pi_console_log` `pi_run_pjsr` `pi_restart` `pi_stop`
