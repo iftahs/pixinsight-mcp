@@ -38,7 +38,7 @@ export class WbppRunner {
   start(opts: { dirs?: string[]; files?: string[]; output_dir: string; params?: Record<string, string | number | boolean>; keywords?: string }): WbppRun {
     const script = this.wbppScript();
     ensureDirSync(opts.output_dir);
-    const parts: string[] = [piPath(script), "automationMode=true", `outputDir=${piPath(opts.output_dir)}`];
+    const parts: string[] = [piPath(script), "automationMode=true", `outputDirectory=${piPath(opts.output_dir)}`];
     for (const d of opts.dirs ?? []) parts.push(`dir=${piPath(d)}`);
     for (const f of opts.files ?? []) parts.push(`file=${piPath(f)}`);
     if (opts.keywords) parts.push(`keywords=${opts.keywords}`);

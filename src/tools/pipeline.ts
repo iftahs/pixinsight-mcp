@@ -56,7 +56,7 @@ export function registerPipelineTools(server: McpServer, ctx: AppContext): void 
   defineTool(server, {
     name: "wbpp_run",
     description:
-      "Cross-check: run PixInsight's own WeightedBatchPreprocessing (WBPP) in a separate PixInsight instance on a light group + calibration groups, fully automated. Slow (whole pipeline) but independent — compare its master light to ours with image_statistics/measure_stars. Extra WBPP parameters can be passed as params (WBPP automation names).",
+      "Cross-check: run PixInsight's own WeightedBatchPreprocessing (WBPP) in a separate PixInsight instance on a light group + calibration groups, fully automated. Slow (whole pipeline) but independent — compare its master light to ours with image_statistics/measure_stars. Extra WBPP parameters can be passed as params using WBPP automation names (e.g. generateRejectionMaps, darkExposureTolerance, smartNamingOverride).",
     input: { light_group_id: z.string().optional(), dirs: z.array(z.string()).optional().describe("Directories to add (all frame types inside)"), files: z.array(z.string()).optional(), calibration_group_ids: z.array(z.string()).optional(), output_dir: z.string().optional(), params: z.record(z.union([z.string(), z.number(), z.boolean()])).optional() },
     handler: async (a) => {
       const files = [...(a.files ?? [])];
