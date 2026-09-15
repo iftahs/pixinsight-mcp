@@ -34,6 +34,8 @@ export const ConfigSchema = z.object({
   wbppParams: z.record(z.union([z.string(), z.number(), z.boolean()])).default({}),
   /** Name of the per-target working directory when workLayout = "target". */
   workingDirName: z.string().default("working-files"),
+  /** Stop before stacking whenever the calibration plan carries a data-quality warning (temperature mismatch, dark scaling, missing flats/darks) until the caller acknowledges it. */
+  confirmOnWarnings: z.boolean().default(true),
   /** Keep calibrated/cosmetic/debayered/weighted/registered intermediates after the pipeline finishes (default: delete, keep masters + master light). */
   keepIntermediates: z.boolean().default(false),
   /** Directory names skipped by scan_frames (working files must never be re-scanned as raw data). */

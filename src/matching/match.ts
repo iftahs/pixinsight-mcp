@@ -46,6 +46,8 @@ export interface CalibrationPlan {
   };
   warnings: string[];
   blocking: string[];
+  /** Data-quality issues the user must acknowledge before stacking (mismatched/missing calibration). */
+  needs_confirmation: string[];
 }
 
 function approx(a?: number, b?: number, pct = 0.5): boolean {
@@ -242,12 +244,20 @@ export function buildPlan(light: FrameGroup, groups: FrameGroup[], opts: PlanOpt
     reasoning.push("no darks and no bias available");
   }
 
+  const needs: string[] = [];
+  if (!dark.chosen) needs.push("no matching darks");
+  else if (dark.chosen.grade !== "ok") needs.push(`dark temperature mismatch ${Number(dark.chosen.deltas.temp_c).toFixed(1)} °C (${dark.chosen.grade}) — chosen set: ${dark.chosen.label}`);
+  if (darkScaled) needs.push("darks need scaling (exposure mismatch)");
+  if (!flat.chosen) needs.push("no flats");
+  else if (flat.chosen.grade !== "ok") needs.push(`flats: ${flat.chosen.reasons.filter((r) => /dust|focus/.test(r)).join("; ")}`);
+  if (flat.chosen && flatCal === "none") needs.push("flats cannot be calibrated (no flat-dark, no bias)");
   return {
     light_group: light.id,
     dark,
     flat,
     flat_dark: flatDark as Match,
     bias,
+    needs_confirmation: needs,
     policy: {
       mode,
       master_bias_enabled: biasOn,

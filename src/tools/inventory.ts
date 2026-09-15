@@ -120,7 +120,7 @@ export function registerInventoryTools(server: McpServer, ctx: AppContext): void
       const plan = buildPlan(light, scan.groups, { tolerances: ctx.cfg.tolerances, requireFlats: ctx.cfg.requireFlats, allowDarkScaling: allow_dark_scaling, force });
       // Cached masters that would apply
       const cached = ctx.masters.list().filter((m) => m.camera === light.instrume && m.gain === light.gain);
-      return { light: { id: light.id, label: light.label, count: light.count, total_exposure_h: Number((light.total_exposure_s / 3600).toFixed(2)) }, ...plan, cached_masters: cached.map((m) => ({ kind: m.kind, path: m.path, exptime: m.exptime, temp_bucket: m.temp_bucket, frame_count: m.frame_count })) };
+      return { light: { id: light.id, label: light.label, count: light.count, total_exposure_h: Number((light.total_exposure_s / 3600).toFixed(2)) }, ...plan, requires_user_confirmation: plan.needs_confirmation.length > 0, cached_masters: cached.map((m) => ({ kind: m.kind, path: m.path, exptime: m.exptime, temp_bucket: m.temp_bucket, frame_count: m.frame_count })) };
     },
   });
 

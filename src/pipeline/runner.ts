@@ -57,6 +57,8 @@ export interface PipelineOptions {
   max_frames?: number;
   /** Keep intermediates (default from config keepIntermediates). */
   keep_intermediates?: boolean;
+  /** The user has seen the calibration issues (match_calibration.needs_confirmation) and wants to proceed anyway. */
+  acknowledge_warnings?: boolean;
 }
 
 export interface PipelineState {
@@ -125,6 +127,13 @@ export class PipelineRunner {
       if (this.ctx.cfg.workLayout === "target") {
         const work = this.ctx.sessions.useTargetDir(SessionManager.targetDirOf(light.dir), this.ctx.cfg.workingDirName);
         this.ctx.safety.allow(work);
+      }
+      // House rule: never stack silently on mismatched/missing calibration — the user decides.
+      if (this.ctx.cfg.confirmOnWarnings && !opts.acknowledge_warnings) {
+        const p = buildPlan(light, scan.groups, { tolerances: this.ctx.cfg.tolerances, requireFlats: this.ctx.cfg.requireFlats, allowDarkScaling: opts.allow_dark_scaling, force: opts.force });
+        if (p.needs_confirmation.length) {
+          throw new BridgeError("NEEDS_CONFIRMATION", `Calibration issues for ${light.label}: ${p.needs_confirmation.join("; ")}. Tell the user and ask whether to proceed (better data may exist or can be shot); rerun with acknowledge_warnings:true to stack anyway.`, { needs_confirmation: p.needs_confirmation, warnings: p.warnings, dark: p.dark.chosen, flat: p.flat.chosen });
+        }
       }
       const engine = opts.engine ?? this.ctx.cfg.stackingEngine;
       // Blink exclusions recorded by exclude_frames for this group

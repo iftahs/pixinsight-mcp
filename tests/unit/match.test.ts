@@ -146,6 +146,15 @@ describe("CMOS calibration policy", () => {
     expect(p.warnings.join(" ")).toMatch(/no flats/);
   });
 
+  it("flags mismatches for user confirmation", () => {
+    const l = group({ type: "light", ccd_temp_median: -9.8 });
+    const bad = buildPlan(l, [l, group({ type: "dark", ccd_temp_median: 0 })], { tolerances: tol, requireFlats: false });
+    expect(bad.needs_confirmation.some((n) => /temperature mismatch/.test(n))).toBe(true);
+    expect(bad.needs_confirmation).toContain("no flats");
+    const good = buildPlan(l, [l, group({ type: "dark", ccd_temp_median: -10 }), group({ type: "flat", exptime: 1 }), group({ type: "flatdark", exptime: 1 })], { tolerances: tol, requireFlats: true });
+    expect(good.needs_confirmation).toEqual([]);
+  });
+
   it("the user's real situation: warm darks, no flats, no bias", () => {
     const l = group({ type: "light", ccd_temp_median: 0.0 });
     const groups = [l, group({ type: "dark", ccd_temp_median: -4.7 }), group({ type: "dark", ccd_temp_median: 0, gain: 50 })];

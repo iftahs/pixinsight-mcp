@@ -12,7 +12,7 @@ export function registerPipelineTools(server: McpServer, ctx: AppContext): void 
   defineTool(server, {
     name: "pipeline_run",
     description:
-      "One call from raw lights to a master light. engine 'wbpp' (default): PixInsight's WeightedBatchPreprocessing in a separate instance with exactly the matched calibration groups, then the master is opened in the daemon and WBPP intermediates are deleted. engine 'native': plan → masters (cached) → calibrate → cosmetic (CFA) → debayer → measure → select (SSWEIGHT) → register (+drizzle data) → local normalization → integrate [→ drizzle]. Frames dropped with exclude_frames (after blink_frames) are honoured. Working files go to <target dir>/working-files. Runs in the background; poll pipeline_status. Resumable with resume_id.",
+      "One call from raw lights to a master light. engine 'wbpp' (default): PixInsight's WeightedBatchPreprocessing in a separate instance with exactly the matched calibration groups, then the master is opened in the daemon and WBPP intermediates are deleted. engine 'native': plan → masters (cached) → calibrate → cosmetic (CFA) → debayer → measure → select (SSWEIGHT) → register (+drizzle data) → local normalization → integrate [→ drizzle]. Frames dropped with exclude_frames (after blink_frames) are honoured. Working files go to <target dir>/working-files. REFUSES with NEEDS_CONFIRMATION when match_calibration reports mismatched/missing calibration (dark temperature, dark scaling, flats) until the user has been told and acknowledge_warnings:true is passed. Runs in the background; poll pipeline_status. Resumable with resume_id.",
     input: {
       light_group_id: z.string().optional().describe("From scan_frames (required unless resume_id)"),
       resume_id: z.string().optional(),
@@ -36,6 +36,7 @@ export function registerPipelineTools(server: McpServer, ctx: AppContext): void 
       rejection_warn_pct: z.number().optional(),
       max_frames: z.number().int().min(3).optional().describe("Only the first N lights (quick end-to-end smoke test)"),
       keep_intermediates: z.boolean().optional().describe("Keep calibrated/cosmetic/debayered/weighted/registered files (default: config keepIntermediates=false: deleted as soon as the next stage succeeds)"),
+      acknowledge_warnings: z.boolean().optional().describe("Set only after the user has seen match_calibration.needs_confirmation and said to proceed"),
     },
     handler: async (a) => {
       if (!a.resume_id && !a.light_group_id) throw new BridgeError("BAD_ARGS", "light_group_id or resume_id required");

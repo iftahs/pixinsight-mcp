@@ -35,6 +35,14 @@ calibration frames were found. **Show them the calibration plan and get confirma
 stacking.** A wrong dark match wastes an hour of compute and produces a subtly broken result that is
 hard to diagnose later.
 
+**Stop rule (house rule).** If `match_calibration` returns `needs_confirmation` (dark temperature
+mismatch beyond 2 °C, dark scaling, no/aged flats, unusable flats) — or you notice anything else
+that does not fit (temperature drift, wrong gain, frames from another night) — do NOT stack.
+Report the exact issue with numbers, say what data would fix it (e.g. "gain-50 darks at −10 °C,
+30 × 180 s"), and ask the user whether to proceed anyway or wait for better calibration frames.
+`pipeline_run` enforces this: it refuses with `NEEDS_CONFIRMATION` until you pass
+`acknowledge_warnings: true`, which you may only do after the user has explicitly agreed.
+
 Flag these out loud:
 - No flats → say so plainly; vignetting and dust motes will not be correctable afterwards.
 - No darks → survivable on a cooled CMOS sensor, but enable cosmetic-correction auto-detect.
