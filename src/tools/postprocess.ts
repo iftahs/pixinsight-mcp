@@ -143,6 +143,14 @@ export function registerPostprocessTools(server: McpServer, ctx: AppContext): vo
   });
 
   defineTool(server, {
+    name: "reduce_stars",
+    description: "Make stars smaller so the object stands out (no StarXTerminator needed): StarMask protects the object/background, then a morphological selection shrinks star profiles. Non-linear stage, after the stretch. amount 0.3 gentle, 0.5 default, 0.7 strong; iterations 1-3. Check crop_preview afterwards for dark rings. Checkpoints first.",
+    input: { id: z.string(), amount: z.number().min(0).max(1).optional(), iterations: z.number().int().min(1).max(4).optional(), operator: z.enum(["selection", "erosion"]).optional().describe("selection (default, gentle) or erosion (stronger)"), selection: z.number().min(0).max(0.5).optional(), mask_layers: z.number().int().min(2).max(6).optional(), keep_mask: z.boolean().optional(), checkpoint: Ckpt },
+    destructive: true,
+    handler: async (a) => run("reduce_stars", { ...a, ...ck(a.checkpoint) }, 1_800_000),
+  });
+
+  defineTool(server, {
     name: "rotate",
     description: "Rotate the view: 90/180/270 lossless (FastRotation) or any angle (Rotation, resampled). Drops the astrometric solution, so do it after plate_solve/SPCC. Checkpoints first.",
     input: { id: z.string(), angle: z.number(), checkpoint: Ckpt },

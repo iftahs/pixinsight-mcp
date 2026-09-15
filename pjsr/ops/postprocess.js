@@ -745,3 +745,49 @@ PIMCP.ops.rotate = function (args) {
       return { angle: angle, method: "Rotation" };
    });
 };
+
+/**
+ * Star reduction without StarXTerminator: a StarMask protects everything but the stars, then a
+ * morphological selection (erosion-biased) shrinks star profiles. Non-linear images only.
+ * args: id, amount (0..1, default 0.5), iterations (1..3, default 2), selection (0..0.5, default 0.25),
+ *       size (3|5, default 3), mask_layers (StarMask wavelet layers, default 4), keep_mask
+ */
+PIMCP.ops.reduce_stars = function (args) {
+   args._op = "reduce_stars";
+   return PIMCP.pp.destructive(args, function (v) {
+      if (v.image.median() < 0.08) PIMCP.fail("LINEAR_IMAGE", "reduce_stars expects a stretched (non-linear) image");
+      var w = v.window;
+      var before = {};
+      var ws = ImageWindow.windows;
+      for (var i = 0; i < ws.length; ++i) before[ws[i].mainView.id] = true;
+      var SM = new StarMask;
+      SM.waveletLayers = Number(args.mask_layers || 4);
+      SM.noiseThreshold = Number(args.noise_threshold === undefined ? 0.15 : args.noise_threshold);
+      SM.largeScaleGrowth = 1; SM.smallScaleGrowth = 1; SM.growthCompensation = 2;
+      SM.smoothness = Number(args.mask_smoothness === undefined ? 8 : args.mask_smoothness);
+      SM.shadowsClipping = 0; SM.midtonesBalance = 0.5; SM.highlightsClipping = 1;
+      SM.aggregateStructures = false; SM.binarizeStructures = false;
+      SM.mode = PIMCP.enumOf(StarMask, "StarMask");
+      if (!PIMCP.quiet(SM).executeOn(v, false)) PIMCP.fail("PI_PROCESS_FAILED", "StarMask failed");
+      var mask = null;
+      ws = ImageWindow.windows;
+      for (i = 0; i < ws.length; ++i) if (!before[ws[i].mainView.id]) mask = ws[i];
+      if (!mask) PIMCP.fail("STARMASK_NO_OUTPUT", "StarMask produced no window");
+      mask.mainView.id = PIMCP.win.uniqueId(v.id + "_starmask");
+      try {
+         w.setMask(mask, false); w.maskEnabled = true; w.maskVisible = false;
+         var M = new MorphologicalTransformation;
+         M.operator = PIMCP.pp.enumOr(MorphologicalTransformation, [args.operator === "erosion" ? "Erosion" : "Selection", "Erosion"]);
+         M.selectionPoint = Number(args.selection === undefined ? 0.25 : args.selection);
+         M.amount = Number(args.amount === undefined ? 0.5 : args.amount);
+         M.numberOfIterations = Number(args.iterations || 2);
+         M.structureSize = 3;   // default 3x3 box structure (structureWayTable cannot be set from scripts)
+         M.interlacingDistance = 1;
+         PIMCP.pp.exec(M, v);
+      } finally {
+         w.removeMask();
+         if (!args.keep_mask) mask.forceClose();
+      }
+      return { method: "StarMask + Morphological" + (args.operator === "erosion" ? "Erosion" : "Selection"), amount: args.amount === undefined ? 0.5 : args.amount, iterations: args.iterations || 2, mask_id: args.keep_mask ? mask.mainView.id : null };
+   });
+};

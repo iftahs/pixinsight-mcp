@@ -102,32 +102,59 @@ Do not blindly accept the default expression. Look at the measurement spread fir
 
 Tell the user what you rejected and why, with numbers.
 
-### 4. Post-processing (the user's house style)
+### 4. Post-processing: the default recipe (galaxy / broadband OSC)
 
-Goals: **DBE for gradients, noise removed, stars kept small, natural pleasing colours**, then a
-project save and a 16-bit TIFF for final touch-up in Photoshop.
+Goals: DBE for gradients, noise removed but detail kept, HDR core, **small stars so the object
+stands out**, natural colours with the blue star-forming regions brought out, then project save,
+`PROCESSING.md` and a 16-bit TIFF for Photoshop. Preview after every step; check clipping with
+`image_statistics` after every stretch/curve. Parameters below are the M31 defaults that worked;
+scale them to the data (fewer frames → gentler denoise/contrast).
 
-Linear stage, in this order (preview after every step):
+Linear stage:
 
-1. `auto_crop` to trim registration edges (WBPP's `_autocrop` master already has this)
-2. `gradient_correction { method: "DBE" }`: DynamicBackgroundExtraction with automatic samples
-   (check `dry_run` sample count first; raise `tolerance` or `samples_per_row` if too few)
-3. `background_neutralize`
-4. `plate_solve` + `color_calibrate { method: "SPCC" }` (needs the local Gaia DR3/SP database:
-   check `gaia_info`; install with `configure_gaia { dir }`). Only if no Gaia database and no
-   network: `color_calibrate { method: "ColorCalibration" }`
-5. `deconvolve` only if BlurXTerminator exists (native RL is risky, skip unless asked)
-6. `denoise`: NoiseXTerminator if installed, else native MLT (`strength` 0.3-0.5); check a
-   `crop_preview` at 1:1 that stars and galaxy detail survived
-7. `stretch { method: "masked" }`: MaskedStretch keeps star cores small and colourful; use
-   `target_background` 0.10-0.15. Avoid a plain hard STF stretch (bloats stars)
+1. `gradient_correction { method: "DBE" }` — check `dry_run` first: need ≥ 12 clean samples
+   (raise `tolerance` / `samples_per_row` if fewer)
+2. `background_neutralize`
+3. `plate_solve` then `color_calibrate { method: "SPCC" }` (needs the local Gaia DR3/SP database:
+   `gaia_info`; install with `configure_gaia { dir }`). Fallback only if truly unavailable:
+   `color_calibrate { method: "ColorCalibration" }`
+4. `denoise { method: "native", strength: 0.3 }` (NoiseXTerminator if installed). Verify with a
+   1:1 `crop_preview` that dust lanes and faint stars survived — lower strength if not
 
-Non-linear stage: `scnr` (green), `saturation` (0.2-0.4), `curves { contrast: 0.1-0.2 }`, optional
-`hdr_compress` for the galaxy core, `local_contrast` sparingly, `sharpen` only with a range mask.
-Then `save_project { id, name }` (also writes `working-files/PROCESSING.md`, the human-readable
-record of every step), `save_image { id, format: "tif", bit_depth: 16 }` into
-`working-files/export/`, and `cleanup_working_files { also_checkpoints: true }`. Report the
-TIFF, project and PROCESSING.md paths.
+Stretch and structure:
+
+5. `stretch { method: "masked", target_background: 0.15 }` — MaskedStretch keeps star cores small
+6. `hdr_compress { layers: 6, iterations: 1 }` — reveals the core/inner dust lanes
+7. `range_mask { mask_id: "gal_mask", low: 0.22, fuzziness: 0.15, smoothness: 8, stretch: false }`
+   → `apply_mask { id, mask_id: "gal_mask", visible: false }` →
+   `local_contrast { radius: 160, slope_limit: 1.8, amount: 0.35 }` → `apply_mask { id, remove: true }`
+   → `close_window { id: "gal_mask" }` (local contrast on the object only; never on sky/stars)
+
+Colour:
+
+8. `scnr { amount: 0.7 }`
+9. `saturation { curve: [[0,0.25],[0.1,0.3],[0.3,0.25],[0.5,0.45],[0.62,0.7],[0.72,0.7],[0.85,0.35],[1,0.25]] }`
+   (hue curve: blue/cyan boosted most; a second pass
+   `[[0,0.05],[0.35,0.05],[0.5,0.3],[0.6,0.55],[0.7,0.55],[0.8,0.25],[1,0.05]]` if the outer arms still look grey)
+10. `curves { contrast: 0.18 }` and a faint-end lift `curves { curves: { K: [[0,0],[0.08,0.105],[0.3,0.35],[0.7,0.72],[1,1]] } }`
+    to pull the outer halo, then bring the sky back to ~0.12:
+    `curves { curves: { K: [[0,0],[0.17,0.115],[0.5,0.47],[0.8,0.8],[1,1]] } }` (adjust the first x to the measured median)
+
+Stars and framing:
+
+11. `reduce_stars { amount: 0.7, iterations: 3, operator: "erosion" }` — StarMask protects the object;
+    verify with `crop_preview` (no dark rings, faint stars still present). `amount 0.5, iterations 2,
+    operator selection` is the gentle variant
+12. `rotate { angle: 180 }` / `crop` as the user wants the framing (after SPCC; drops the solution)
+
+Finish:
+
+13. `save_project { id, name }` (also writes `PROCESSING.md`), `save_image { format: "tif", bit_depth: 16 }`
+    and a `.jpg` into `working-files/export/`, then `cleanup_working_files { also_checkpoints: true }`.
+    Report the TIFF, project and PROCESSING.md paths and send the JPEG to the user.
+
+Do not add: native Richardson-Lucy deconvolution (rings), unmasked LHE (bloats stars, amplifies sky
+noise), a plain hard STF stretch (bloats stars), sharpening without a mask.
 
 ### Quality gates — check after every stretch or sharpening step
 

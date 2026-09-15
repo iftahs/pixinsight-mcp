@@ -96,13 +96,9 @@ PIMCP.ops.morphology = function (args) {
    return PIMCP.pp.destructive(args, function (v) {
       var P = new MorphologicalTransformation;
       P.operator = PIMCP.enumOf(MorphologicalTransformation, args.operator || "Dilation", "operator");
-      P.structureSize = Number(args.size || 5);
+      P.structureSize = 3;   // default 3x3 structure; structureWayTable is not settable from scripts
       P.numberOfIterations = Number(args.iterations || 1);
       P.amount = Number(args.amount === undefined ? 1 : args.amount);
-      var n = P.structureSize, way = [], s = "";
-      for (var i = 0; i < n * n; ++i) s += "x";
-      way.push([s]);
-      P.structureWayTable = way;
       PIMCP.pp.exec(P, v);
       return { operator: args.operator || "Dilation", size: n };
    });

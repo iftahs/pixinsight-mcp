@@ -111,7 +111,7 @@ and used by the `process-session` prompt). Install it as a Claude skill for best
 | Post-processing style: DBE (auto samples), denoise, MaskedStretch (small stars), SPCC colour, project save + 16-bit TIFF + `PROCESSING.md` log | see `skill/SKILL.md` |
 | Session bookkeeping (scan, blink, history) lives in `<working-files>/.session/` and is resumed by `pi_start_session { target_dir }` | - |
 
-## Tools (92)
+## Tools (96)
 
 **Session** `pi_status` `pi_capabilities` `pi_start_session` `pi_list_sessions` `pi_use_session`
 `pi_end_session` `pi_console_log` `pi_run_pjsr` `pi_restart` `pi_stop`
@@ -133,7 +133,7 @@ and used by the `process-session` prompt). Install it as a Claude skill for best
 
 **Post-processing** `apply_process` `process_params` `gradient_correction` `plate_solve` `annotate`
 `color_calibrate` `background_neutralize` `scnr` `deconvolve` `denoise` `remove_stars` `stretch`
-`curves` `saturation` `resample` `crop` `auto_crop` `pixel_math` `linear_fit` `sharpen`
+`curves` `saturation` `reduce_stars` `rotate` `resample` `crop` `auto_crop` `pixel_math` `linear_fit` `sharpen`
 `hdr_compress` `local_contrast` `combine_stars` `extract_channels` `convert_to_gray` `invert`
 
 **Masks** `star_mask` `range_mask` `pixelmath_mask` `apply_mask` `mask_info` `binarize`
@@ -180,8 +180,9 @@ pipeline_run { light_group_id: "light_01" }          → WBPP in M 31/working-fi
 pipeline_status                                       → stage register 8/13, current 12/30 …
 render_preview { id: "<master_view_id>" }             → look at it
 measure_stars / image_statistics                      → FWHM, eccentricity, noise, clipping
-gradient_correction { method: "DBE" } → background_neutralize → color_calibrate → denoise → stretch { method: "masked" }
-→ scnr → saturation → save_project → save_image { format: "tif", bit_depth: 16 }
+gradient_correction { method: "DBE" } → background_neutralize → plate_solve → color_calibrate { method: "SPCC" }
+→ denoise → stretch { method: "masked" } → hdr_compress → masked local_contrast → scnr → saturation (blue-weighted)
+→ curves → reduce_stars → rotate → save_project (+ PROCESSING.md) → save_image { format: "tif", bit_depth: 16 }
 ```
 
 Every destructive tool writes an `.xisf` checkpoint first and returns its path; `restore_checkpoint`
