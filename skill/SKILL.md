@@ -41,10 +41,26 @@ Flag these out loud:
 - Darks whose exposure or temperature does not match the lights.
 - Flats from a different night or a very different focus position.
 
+### 1b. Blink before stacking (mandatory)
+
+`blink_frames { group_id }` renders a contact sheet of every sub (auto-stretched thumbnails with
+background level, star count, gradient) and flags suspects in red. LOOK at the sheet: clouds, dew,
+dawn, satellite trails, wind, focus slips. Then `exclude_frames { indexes, reason }`. Tell the
+user which frames you dropped and why. With fewer than ~20 frames be reluctant; with plenty of
+frames, be strict. `pipeline_run` honours the exclusion list automatically.
+
 ### 2. Calibration and stacking
 
-Preferred: one call, `pipeline_run { light_group_id }`, then poll `pipeline_status` every 30–60 s
-and relay the stage + progress to the user. It runs exactly this fixed chain (order matters):
+**Default engine is WBPP** (PixInsight's WeightedBatchPreprocessing, what the user normally uses).
+`pipeline_run { light_group_id }` runs WBPP in a separate PixInsight instance with exactly the
+calibration groups chosen by `match_calibration`, then opens the master light in the daemon as view
+`master_light` and deletes WBPP's intermediates. Working files live in
+`<object folder>/working-files/` (next to the lights, e.g. `.../M 31/working-files`), never in the
+raw data folders themselves. Only switch to `engine: "native"` when the user asks for the
+step-by-step chain or wants to intervene between stages. Poll `pipeline_status` every 30-60 s and
+relay the stage + progress to the user.
+
+The native chain, for reference (order matters):
 
 ```
 build_master_bias / build_master_dark / build_master_flat   (cached by content fingerprint)
@@ -86,19 +102,29 @@ Do not blindly accept the default expression. Look at the measurement spread fir
 
 Tell the user what you rejected and why, with numbers.
 
-### 4. Post-processing
+### 4. Post-processing (the user's house style)
 
-Linear stage, in this order:
+Goals: **DBE for gradients, noise removed, stars kept small, natural pleasing colours**, then a
+project save and a 16-bit TIFF for final touch-up in Photoshop.
 
-1. `plate_solve` — needed by colour calibration
-2. `gradient_correction` — remove light pollution gradients
-3. `deconvolve` in correction mode (BlurXTerminator), if installed
-4. `color_calibrate` (SPCC)
-5. `denoise` (NoiseXTerminator) — while still linear
-6. `remove_stars` (StarXTerminator), if you plan to stretch stars and nebula separately
-7. `stretch` — the linear-to-nonlinear transition
+Linear stage, in this order (preview after every step):
 
-Non-linear stage: saturation, contrast, local sharpening, star recombination, final crop.
+1. `auto_crop` to trim registration edges (WBPP's `_autocrop` master already has this)
+2. `gradient_correction { method: "DBE" }`: DynamicBackgroundExtraction with automatic samples
+   (check `dry_run` sample count first; raise `tolerance` or `samples_per_row` if too few)
+3. `background_neutralize`
+4. `plate_solve` + `color_calibrate { method: "SPCC" }` when a plate solve is possible; otherwise
+   `color_calibrate { method: "ColorCalibration" }`
+5. `deconvolve` only if BlurXTerminator exists (native RL is risky, skip unless asked)
+6. `denoise`: NoiseXTerminator if installed, else native MLT (`strength` 0.3-0.5); check a
+   `crop_preview` at 1:1 that stars and galaxy detail survived
+7. `stretch { method: "masked" }`: MaskedStretch keeps star cores small and colourful; use
+   `target_background` 0.10-0.15. Avoid a plain hard STF stretch (bloats stars)
+
+Non-linear stage: `scnr` (green), `saturation` (0.2-0.4), `curves { contrast: 0.1-0.2 }`, optional
+`hdr_compress` for the galaxy core, `local_contrast` sparingly, `sharpen` only with a range mask.
+Then `save_project { id, name }` and `save_image { id, format: "tif", bit_depth: 16 }` into
+`working-files/export/`. Report both paths.
 
 ### Quality gates — check after every stretch or sharpening step
 
@@ -112,6 +138,13 @@ Non-linear stage: saturation, contrast, local sharpening, star recombination, fi
 
 If a gate fails, roll back to the checkpoint the tool reported and retry with gentler parameters.
 Do not try to repair an over-processed image with more processing.
+
+## Housekeeping
+
+- Working files: `<object>/working-files/` (previews, checkpoints, master/, project/, export/).
+  Intermediates are deleted automatically as stages complete; `cleanup_working_files` for the rest.
+- Never leave tens of GB behind: after the final export run `cleanup_working_files` (keeps master,
+  project, export, previews, checkpoints unless told otherwise).
 
 ## Rollback and code changes
 

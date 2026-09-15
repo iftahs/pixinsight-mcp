@@ -23,8 +23,9 @@ export interface ScanResult {
   };
 }
 
-export async function listFiles(root: string, recursive = true): Promise<string[]> {
+export async function listFiles(root: string, recursive = true, excludeDirNames: string[] = []): Promise<string[]> {
   const out: string[] = [];
+  const excluded = new Set(excludeDirNames.map((d) => d.toLowerCase()));
   async function walk(dir: string): Promise<void> {
     let entries: import("node:fs").Dirent[];
     try {
@@ -35,7 +36,7 @@ export async function listFiles(root: string, recursive = true): Promise<string[
     for (const e of entries) {
       const p = path.join(dir, e.name);
       if (e.isDirectory()) {
-        if (recursive && !e.name.startsWith(".")) await walk(p);
+        if (recursive && !e.name.startsWith(".") && !excluded.has(e.name.toLowerCase())) await walk(p);
       } else if (e.isFile()) out.push(p);
     }
   }
@@ -44,8 +45,8 @@ export async function listFiles(root: string, recursive = true): Promise<string[
 }
 
 /** Parse all FITS headers below root (XISF files are listed but not parsed). */
-export async function scanFrames(root: string, opts: { recursive?: boolean; concurrency?: number } = {}): Promise<ScanResult> {
-  const files = await listFiles(root, opts.recursive ?? true);
+export async function scanFrames(root: string, opts: { recursive?: boolean; concurrency?: number; excludeDirNames?: string[] } = {}): Promise<ScanResult> {
+  const files = await listFiles(root, opts.recursive ?? true, opts.excludeDirNames ?? []);
   const fits = files.filter((f) => FITS_EXT.has(path.extname(f).toLowerCase()));
   const frames: FrameRecord[] = [];
   const errors: ScanResult["errors"] = [];

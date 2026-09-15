@@ -107,3 +107,34 @@ describe("scan on synthetic fixtures", () => {
     expect(s.groups.filter((g) => g.type === "dark").length).toBe(3);
   });
 });
+
+describe("house rules", () => {
+  it("resolves the object directory above a Lights subfolder", async () => {
+    const { SessionManager } = await import("../../src/session.js");
+    expect(SessionManager.targetDirOf("C:/Astro/2026/M 31/Lights")).toBe(path.resolve("C:/Astro/2026/M 31"));
+    expect(SessionManager.targetDirOf("C:/Astro/2026/M 31")).toBe(path.resolve("C:/Astro/2026/M 31"));
+    expect(SessionManager.targetDirOf("C:/ASIAIR/Autorun/Light/M 31")).toBe(path.resolve("C:/ASIAIR/Autorun/Light/M 31"));
+  });
+  it("defaults to WBPP, target layout, no intermediates", () => {
+    const c = ConfigSchema.parse({});
+    expect(c.stackingEngine).toBe("wbpp");
+    expect(c.workLayout).toBe("target");
+    expect(c.keepIntermediates).toBe(false);
+    expect(c.excludeDirNames).toContain("working-files");
+  });
+  it("allows writes into an allowed working dir inside a protected root", () => {
+    const g = new SafetyGuard("C:/data/astro");
+    g.allow("C:/data/astro/2026/M 31/working-files");
+    expect(g.assertWritable("C:/data/astro/2026/M 31/working-files/master/x.xisf")).toBeTruthy();
+    expect(() => g.assertWritable("C:/data/astro/2026/M 31/Lights/x.xisf")).toThrow();
+  });
+  it("scan skips working-files directories", async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "pimcp-excl-"));
+    generateFixtures(root, 3);
+    const lightDir = path.join(root, "Autorun", "Light", "M 31");
+    fs.mkdirSync(path.join(root, "Autorun", "Light", "working-files"), { recursive: true });
+    fs.copyFileSync(path.join(lightDir, fs.readdirSync(lightDir)[0]), path.join(root, "Autorun", "Light", "working-files", "copy.fit"));
+    const s = await scanFrames(root, { excludeDirNames: ["working-files"] });
+    expect(s.summary.by_type.light).toBe(3);
+  });
+});

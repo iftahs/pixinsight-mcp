@@ -18,6 +18,7 @@
 #include "ops/stacking.js"
 #include "ops/postprocess.js"
 #include "ops/masks.js"
+#include "ops/blink.js"
 #include "generated/adp.js"
 
 var PIMCP_VERSION = "0.1.0";

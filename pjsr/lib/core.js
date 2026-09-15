@@ -11,7 +11,8 @@ PIMCP.ops = PIMCP.ops || {};
 PIMCP.isNull = function (o) { return o === null || o === undefined || o.isNull === true; };
 
 /** Preprocessor macros are not visible to eval'd scripts (pi_run_pjsr); expose the useful ones. */
-PIMCP.const = { ColorSpace_Gray: ColorSpace_Gray, ColorSpace_RGB: ColorSpace_RGB, SampleType_Real: SampleType_Real, SampleType_Integer: SampleType_Integer, UndoFlag_NoSwapFile: UndoFlag_NoSwapFile };
+// NOTE: keys must not be macro names — the preprocessor substitutes macros even after a dot.
+PIMCP.K = { GRAY: ColorSpace_Gray, RGB: ColorSpace_RGB, REAL: SampleType_Real, INTEGER: SampleType_Integer, NOSWAP: UndoFlag_NoSwapFile };
 
 // ---------------------------------------------------------------- errors
 PIMCP.Err = function (code, message, extra) {

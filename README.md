@@ -100,7 +100,17 @@ and used by the `process-session` prompt). Install it as a Claude skill for best
 - The PJSR code is compiled at PixInsight start. After editing anything under `pjsr/`, call
   `pi_restart`.
 
-## Tools (89)
+## House rules baked in (configurable)
+
+| Rule | Config |
+|---|---|
+| Working files live next to the object: `<lights folder or its parent>/working-files/` | `workLayout: "target"`, `workingDirName` |
+| Stacking engine = PixInsight **WBPP** (separate instance, exact matched calibration groups, `platesolve=false`) | `stackingEngine: "wbpp"` (`"native"` for the tool chain), `wbppParams` |
+| Blink review before stacking: `blink_frames` contact sheet, then `exclude_frames` | - |
+| Intermediates deleted as soon as the next stage succeeds; `cleanup_working_files` for the rest | `keepIntermediates: false` |
+| Post-processing style: DBE (auto samples), denoise, MaskedStretch (small stars), colour, project save + 16-bit TIFF | see `skill/SKILL.md` |
+
+## Tools (95)
 
 **Session** `pi_status` `pi_capabilities` `pi_start_session` `pi_list_sessions` `pi_use_session`
 `pi_end_session` `pi_console_log` `pi_run_pjsr` `pi_restart` `pi_stop`
@@ -128,7 +138,9 @@ and used by the `process-session` prompt). Install it as a Claude skill for best
 **Masks** `star_mask` `range_mask` `pixelmath_mask` `apply_mask` `mask_info` `binarize`
 `morphology` `blur`
 
-**Orchestration** `pipeline_run` `pipeline_status` `wbpp_run` `wbpp_status`
+**Orchestration** `pipeline_run` (engine wbpp | native) `pipeline_status` `wbpp_run` `wbpp_status`
+
+**Review / project** `blink_frames` `exclude_frames` `save_project` `cleanup_working_files`
 
 Resources: `pi://session/current`, `pi://previews/{name}`, `pi://jobs/{id}/log`, `pi://masters`,
 `pi://skill`. Prompts: `process-session`, `inspect-frame`.
@@ -160,11 +172,13 @@ pi_status                                  → daemon, modules, open windows
 scan_frames { root: "C:/.../Astronomy" }   → light_01 (M 31, 30×180 s), dark_03 (180 s g100), …
 match_calibration { light_group_id: "light_01" }
    → dark_03 chosen (Δ4.7 °C, acceptable), no flats (warning), policy dark-only, bias off
-pipeline_run { light_group_id: "light_01" }          → pipeline_id
+blink_frames { group_id: "light_01" }                  → contact sheet; #1 hazy → exclude_frames { indexes: [1] }
+pipeline_run { light_group_id: "light_01" }          → WBPP in M 31/working-files/wbpp, master opened as view master_light
 pipeline_status                                       → stage register 8/13, current 12/30 …
 render_preview { id: "<master_view_id>" }             → look at it
 measure_stars / image_statistics                      → FWHM, eccentricity, noise, clipping
-plate_solve → gradient_correction → color_calibrate → denoise → stretch → curves → save_image
+gradient_correction { method: "DBE" } → background_neutralize → color_calibrate → denoise → stretch { method: "masked" }
+→ scnr → saturation → save_project → save_image { format: "tif", bit_depth: 16 }
 ```
 
 Every destructive tool writes an `.xisf` checkpoint first and returns its path; `restore_checkpoint`

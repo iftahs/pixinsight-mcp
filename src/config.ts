@@ -22,6 +22,22 @@ export const ConfigSchema = z.object({
   allowRawScripts: z.boolean().default(true),
   /** Auto-launch PixInsight when a tool needs it and no daemon is alive. */
   autoLaunch: z.boolean().default(true),
+  /**
+   * Where intermediate/working files go:
+   *  "target"  → <directory of the light frames>/working-files (next to the object, user rule)
+   *  "workdir" → <workdir>/sessions/<id>/work
+   */
+  workLayout: z.enum(["target", "workdir"]).default("target"),
+  /** Default stacking engine for pipeline_run: PixInsight's own WBPP script (user's usual tool) or the native tool chain. */
+  stackingEngine: z.enum(["wbpp", "native"]).default("wbpp"),
+  /** Extra WBPP automation parameters applied to every wbpp run (WBPP parameter names). */
+  wbppParams: z.record(z.union([z.string(), z.number(), z.boolean()])).default({}),
+  /** Name of the per-target working directory when workLayout = "target". */
+  workingDirName: z.string().default("working-files"),
+  /** Keep calibrated/cosmetic/debayered/weighted/registered intermediates after the pipeline finishes (default: delete, keep masters + master light). */
+  keepIntermediates: z.boolean().default(false),
+  /** Directory names skipped by scan_frames (working files must never be re-scanned as raw data). */
+  excludeDirNames: z.array(z.string()).default(["working-files", "pixinsight-mcp-work", "master", "calibrated", "registered", "debayered", "cosmetic", "weighted", "lnorm", "logs", "wbpp"]),
   /** Compile PixInsight's ImageSolver/AnnotateImage script libraries into the daemon (plate_solve, annotate). */
   includeAdpScripts: z.boolean().default(true),
   /** Extra command line flags for PixInsight. */

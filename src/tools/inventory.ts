@@ -42,7 +42,7 @@ export function registerInventoryTools(server: McpServer, ctx: AppContext): void
       ctx.sessions.update((s) => {
         if (!s.scanned_roots.includes(abs)) s.scanned_roots.push(abs);
       });
-      const scan = await scanFrames(abs, { recursive });
+      const scan = await scanFrames(abs, { recursive, excludeDirNames: ctx.cfg.excludeDirNames });
       await saveScan(ctx, scan);
       const groups = scan.groups.map((g) => ({
         id: g.id,

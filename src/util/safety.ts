@@ -10,9 +10,22 @@ import { BridgeError } from "../bridge/types.js";
  */
 export class SafetyGuard {
   private protectedRoots = new Set<string>();
+  /** Explicitly allowed output directories inside protected roots (the per-target working-files dir). */
+  private allowedDirs = new Set<string>();
 
   constructor(dataRoot?: string) {
     if (dataRoot) this.protect(dataRoot);
+  }
+
+  /** Allow writes below `dir` even if it sits inside a protected root (e.g. <target>/working-files). */
+  allow(dir: string): void {
+    this.allowedDirs.add(path.resolve(dir));
+  }
+
+  isAllowed(target: string): boolean {
+    const abs = path.resolve(target);
+    for (const d of this.allowedDirs) if (isInside(abs, d)) return true;
+    return false;
   }
 
   protect(root: string): void {
@@ -26,6 +39,7 @@ export class SafetyGuard {
   /** Throws if `target` is inside a protected (input) root. */
   assertWritable(target: string, what = "output path"): string {
     const abs = path.resolve(target);
+    if (this.isAllowed(abs)) return abs;
     for (const r of this.protectedRoots) {
       if (isInside(abs, r)) {
         throw new BridgeError("UNSAFE_OUTPUT", `${what} ${abs} is inside protected input root ${r}; outputs must go under the workdir`);

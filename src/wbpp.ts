@@ -38,7 +38,8 @@ export class WbppRunner {
   start(opts: { dirs?: string[]; files?: string[]; output_dir: string; params?: Record<string, string | number | boolean>; keywords?: string }): WbppRun {
     const script = this.wbppScript();
     ensureDirSync(opts.output_dir);
-    const parts: string[] = [piPath(script), "automationMode=true", `outputDirectory=${piPath(opts.output_dir)}`];
+    // platesolve=false: WBPP's astrometric step opens an interactive ImageSolver dialog in automation mode.
+    const parts: string[] = [piPath(script), "automationMode=true", `outputDirectory=${piPath(opts.output_dir)}`, "platesolve=false"];
     for (const d of opts.dirs ?? []) parts.push(`dir=${piPath(d)}`);
     for (const f of opts.files ?? []) parts.push(`file=${piPath(f)}`);
     if (opts.keywords) parts.push(`keywords=${opts.keywords}`);
@@ -91,5 +92,24 @@ export class WbppRunner {
 
   list(): WbppRun[] {
     return [...this.runs.values()];
+  }
+
+  /** Poll until the WBPP instance exits (or timeout). */
+  async wait(id: string, timeoutMs: number, onTick?: (st: WbppRun & { elapsed_s: number }) => void): Promise<WbppRun & { log_tail?: string; elapsed_s: number }> {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      const st = await this.status(id);
+      if (st.status !== "running") return st;
+      if (Date.now() > deadline) throw new BridgeError("WBPP_TIMEOUT", `WBPP run ${id} still running after ${timeoutMs} ms`);
+      onTick?.(st);
+      await new Promise((r) => setTimeout(r, 10_000));
+    }
+  }
+
+  /** Newest log line that looks like a WBPP stage marker, for progress display. */
+  static stageFromLog(tail: string | undefined): string | undefined {
+    if (!tail) return undefined;
+    const lines = tail.split(/\r?\n/).filter((l) => /^\*\s|Begin|End |Executing|Integration|Registration|Calibration|Debayer|Measur|Normaliz|Weight/i.test(l));
+    return lines[lines.length - 1]?.replace(/^\[[^\]]*\]\s*/, "").slice(0, 160);
   }
 }

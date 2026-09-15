@@ -17,6 +17,8 @@ export interface SessionState {
   notes: Record<string, unknown>;
   /** Roots scanned in this session (protected from writes). */
   scanned_roots: string[];
+  /** Target the session works on (light group dir) when workLayout = "target". */
+  target_dir?: string;
 }
 
 /** Sessions are output namespaces under the workdir. One is "current". */
@@ -109,6 +111,29 @@ export class SessionManager {
     this.current = undefined;
     this.persistCurrent();
     return s;
+  }
+
+  /** The object directory for a light group: its folder, or the parent when frames sit in a "Lights" subfolder. */
+  static targetDirOf(lightDir: string): string {
+    const abs = path.resolve(lightDir);
+    return /^(lights?|light[_ -]?frames?|autorun)$/i.test(path.basename(abs)) ? path.dirname(abs) : abs;
+  }
+
+  /**
+   * Point the session's work/previews/checkpoints at <targetDir>/<workingDirName> (workLayout "target").
+   * Returns the working directory.
+   */
+  useTargetDir(targetDir: string, workingDirName: string): string {
+    const work = path.join(path.resolve(targetDir), workingDirName);
+    this.update((s) => {
+      s.target_dir = path.resolve(targetDir);
+      s.work = work;
+      s.previews = path.join(work, "previews");
+      s.checkpoints = path.join(work, "checkpoints");
+      s.pipeline = path.join(work, "pipeline");
+    });
+    for (const d of [work, path.join(work, "previews"), path.join(work, "checkpoints"), path.join(work, "pipeline")]) ensureDirSync(d);
+    return work;
   }
 
   /** Path helper inside the current session's work dir. */

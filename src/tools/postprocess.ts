@@ -10,7 +10,11 @@ const Ckpt = z.boolean().optional().describe("Write an .xisf checkpoint before r
 export function registerPostprocessTools(server: McpServer, ctx: AppContext): void {
   const ck = (checkpoint?: boolean) => ({ checkpoint_dir: piPath(ctx.sessions.ensure().checkpoints), checkpoint: checkpoint ?? true });
   // Post-processing ops can take minutes on a 26 MP frame: wait up to 45 s, then hand back a job_id.
-  const run = (op: string, args: Record<string, unknown>, timeout = 1_800_000) => ctx.bridge.runOrDefer(op, args, { timeoutMs: timeout, deferAfterMs: 45_000 });
+  const run = async (op: string, args: Record<string, unknown>, timeout = 1_800_000) => {
+    const r = await ctx.bridge.runOrDefer(op, args, { timeoutMs: timeout, deferAfterMs: 45_000 });
+    await ctx.history(op, args, r);
+    return r;
+  };
 
   defineTool(server, {
     name: "apply_process",
@@ -31,10 +35,10 @@ export function registerPostprocessTools(server: McpServer, ctx: AppContext): vo
 
   defineTool(server, {
     name: "gradient_correction",
-    description: "Remove light-pollution gradients on a LINEAR image: GradientCorrection (PixInsight ≥1.8.9-3, default) or ABE (polynomial). Checkpoints first. Look at the preview afterwards.",
-    input: { id: z.string(), method: z.enum(["GradientCorrection", "ABE"]).optional(), scale: z.number().optional().describe("GradientCorrection scale (default 5)"), smoothness: z.number().optional(), degree: z.number().int().optional().describe("ABE polynomial degree (default 4)"), correction: z.enum(["subtract", "divide"]).optional(), params: Params, checkpoint: Ckpt },
+    description: "Remove light-pollution gradients on a LINEAR image. method 'DBE' (DynamicBackgroundExtraction with automatically placed background samples, stars/object rejected; the user's preferred method), 'GradientCorrection' (default when DBE not requested), or 'ABE'. Checkpoints first. Look at the preview afterwards; dry_run reports the DBE sample layout.",
+    input: { id: z.string(), method: z.enum(["DBE", "GradientCorrection", "ABE"]).optional(), samples_per_row: z.number().int().optional().describe("DBE grid density (default 10)"), radius: z.number().int().optional().describe("DBE sample radius px"), tolerance: z.number().optional().describe("DBE: reject samples brighter than background by this many sigma (default 2)"), smoothing: z.number().optional().describe("DBE model smoothing (default 0.25)"), dry_run: z.boolean().optional(), scale: z.number().optional().describe("GradientCorrection scale (default 5)"), degree: z.number().int().optional().describe("ABE polynomial degree (default 4)"), correction: z.enum(["subtract", "divide"]).optional(), params: Params, checkpoint: Ckpt },
     destructive: true,
-    handler: async (a) => run("gradient_correction", { ...a, ...ck(a.checkpoint) }),
+    handler: async (a) => (a.method === "DBE" ? run("dbe_auto", { ...a, ...ck(a.checkpoint) }) : run("gradient_correction", { ...a, ...ck(a.checkpoint) })),
   });
 
   defineTool(server, {

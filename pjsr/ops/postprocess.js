@@ -621,3 +621,89 @@ PIMCP.ops.combine_stars = function (args) {
    return { id: args.new_id ? P.newImageId : starless.id, expression: P.expression };
 };
 
+
+// ------------------------------------------------------------------ DynamicBackgroundExtraction with automatic samples
+/**
+ * Place a grid of background samples, reject samples that contain stars or object signal
+ * (local max or local median too far above the global background), then run DBE (subtract, normalize).
+ * args: id, samples_per_row (10), radius (24), tolerance (sigma units above background to reject, 2.0), smoothing (0.25),
+ *       dry_run (return sample layout only), keep_model (open model window)
+ */
+PIMCP.ops.dbe_auto = function (args) {
+   args._op = "dbe";
+   return PIMCP.pp.destructive(args, function (v) {
+      var img = v.image;
+      var W = img.width, H = img.height;
+      var perRow = Number(args.samples_per_row || 10);
+      var radius = Number(args.radius || Math.max(12, Math.round(W / perRow / 12)));
+      var tol = Number(args.tolerance === undefined ? 2.0 : args.tolerance);
+      // Global background estimate on luminance
+      var lum = new Image(W, H, 1, PIMCP.K.GRAY, 32, PIMCP.K.REAL);
+      if (img.isColor) img.getLuminance(lum); else lum.assign(img);
+      var gMed = lum.median(), gMad = lum.MAD() * 1.4826;
+      var stepX = W / (perRow + 1), stepY = H / (Math.round(perRow * H / W) + 1);
+      var rowsN = Math.round(perRow * H / W);
+      var samples = [], rejected = [];
+      for (var r = 1; r <= rowsN; ++r) {
+         for (var c = 1; c <= perRow; ++c) {
+            var x = Math.round(c * stepX), y = Math.round(r * stepY);
+            var rect = new Rect(Math.max(0, x - radius), Math.max(0, y - radius), Math.min(W, x + radius), Math.min(H, y + radius));
+            lum.selectedRect = rect;
+            var m = lum.median(), mx = lum.maximum();
+            lum.resetSelections();
+            // Reject: local median above background (object/nebulosity) or a star inside (max spike)
+            var ok = (m - gMed) < tol * gMad && (mx - m) < 6 * gMad + 0.02;
+            if (ok) samples.push([x, y, radius, 0, 0, false]);
+            else rejected.push({ x: x, y: y, reason: (m - gMed) >= tol * gMad ? "object signal" : "star" });
+         }
+      }
+      lum.free();
+      var minSamples = Number(args.min_samples || 12);
+      if (samples.length < minSamples) PIMCP.fail("DBE_TOO_FEW_SAMPLES", "only " + samples.length + " clean background samples (need " + minSamples + "); raise tolerance or samples_per_row, or use gradient_correction");
+      if (args.dry_run) return { method: "DBE", dry_run: true, samples: samples.length, rejected: rejected.length, radius: radius, background: PIMCP.round(gMed, 6), sigma: PIMCP.round(gMad, 6) };
+      var P = new DynamicBackgroundExtraction;
+      P.imageWidth = W; P.imageHeight = H;
+      P.numberOfChannels = img.numberOfChannels;
+      P.samples = samples;
+      P.defaultSampleRadius = radius;
+      P.tolerance = Number(args.sample_tolerance === undefined ? 0.5 : args.sample_tolerance);
+      P.smoothing = Number(args.smoothing === undefined ? 0.25 : args.smoothing);
+      P.derivativeOrder = Number(args.derivative_order || 2);
+      P.targetCorrection = PIMCP.pp.enumOr(DynamicBackgroundExtraction, [args.correction === "divide" ? "Divide" : "Subtract"]);
+      P.normalize = args.normalize !== false;
+      P.replaceTarget = true;
+      P.discardModel = !args.keep_model;
+      if (args.params) PIMCP.assignParams(P, args.params);
+      PIMCP.progress("dbe", 0, 1, "DBE with " + samples.length + " samples");
+      PIMCP.pp.exec(P, v);
+      return { method: "DBE", samples: samples.length, rejected: rejected.length, radius: radius, smoothing: P.smoothing, correction: args.correction || "subtract" };
+   });
+};
+
+// ------------------------------------------------------------------ project save
+/**
+ * PixInsight has no scriptable project (.xosm) writer. A "project" here is a folder with the
+ * final image as XISF (processing history embedded as XISF properties), plus optional companions.
+ * args: id, dir, name, also_views (other view ids to save alongside, e.g. masks/stars)
+ */
+PIMCP.ops.save_project = function (args) {
+   var v = PIMCP.win.view(PIMCP.req(args, "id"));
+   var dir = PIMCP.req(args, "dir");
+   var name = PIMCP.win.safeId(args.name || v.id);
+   PIMCP.fs.ensureDir(dir);
+   var main = dir + "/" + name + ".xisf";
+   if (File.exists(main)) File.remove(main);
+   if (!v.window.saveAs(main, false, false, false, false)) PIMCP.fail("SAVE_FAILED", "could not save " + main);
+   var others = [];
+   var extra = args.also_views || [];
+   for (var i = 0; i < extra.length; ++i) {
+      var ov = View.viewById(extra[i]);
+      if (PIMCP.isNull(ov)) continue;
+      var p = dir + "/" + name + "_" + PIMCP.win.safeId(extra[i]) + ".xisf";
+      if (File.exists(p)) File.remove(p);
+      if (ov.window.saveAs(p, false, false, false, false)) others.push(p);
+   }
+   var props = [];
+   try { var ids = v.properties; for (i = 0; i < ids.length; ++i) props.push(ids[i]); } catch (e) { }
+   return { main: main, companions: others, view_id: v.id, size: [v.image.width, v.image.height], properties: props.length, history_available: v.window.isModified };
+};

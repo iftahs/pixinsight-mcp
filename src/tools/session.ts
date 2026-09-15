@@ -54,10 +54,14 @@ export function registerSessionTools(server: McpServer, ctx: AppContext): void {
   defineTool(server, {
     name: "pi_start_session",
     description: "Create a new processing session (an output namespace under the workdir: work/, previews/, checkpoints/). Sessions persist across server restarts; the latest is current.",
-    input: { name: z.string().optional().describe("Human label, e.g. target name") },
-    handler: async ({ name }) => {
-      const s = ctx.sessions.start(name);
-      return { session: s };
+    input: { name: z.string().optional().describe("Human label, e.g. target name"), target_dir: z.string().optional().describe("Directory of the object's lights; working files go to <target_dir>/working-files (workLayout 'target')") },
+    handler: async ({ name, target_dir }) => {
+      ctx.sessions.start(name);
+      if (target_dir) {
+        const work = ctx.sessions.useTargetDir(target_dir, ctx.cfg.workingDirName);
+        ctx.safety.allow(work);
+      }
+      return { session: ctx.sessions.ensure() };
     },
   });
 
@@ -108,11 +112,43 @@ export function registerSessionTools(server: McpServer, ctx: AppContext): void {
   defineTool(server, {
     name: "pi_run_pjsr",
     description:
-      "Escape hatch: run arbitrary PJSR (PixInsight JavaScript) inside the warm PixInsight instance. Assign `result = ...` to return JSON. Helpers: PIMCP.win.view(id), PIMCP.stf, PIMCP.preview.render(view,{out_path}). Gated by config allowRawScripts.",
+      "Escape hatch: run arbitrary PJSR (PixInsight JavaScript) inside the warm PixInsight instance. Assign `result = ...` to return JSON. Helpers: PIMCP.win.view(id), PIMCP.stf, PIMCP.preview.render(view,{out_path}), PIMCP.K.{GRAY,RGB,REAL,INTEGER,NOSWAP} (macros are not visible to eval). Gated by config allowRawScripts.",
     input: { script: z.string(), timeout_ms: z.number().int().optional(), script_args: z.record(z.unknown()).optional() },
     handler: async ({ script, timeout_ms, script_args }) => {
       if (!ctx.cfg.allowRawScripts) throw new BridgeError("RAW_SCRIPTS_DISABLED", "pi_run_pjsr is disabled (allowRawScripts=false)");
       return ctx.bridge.run("run_pjsr", { script, script_args }, { timeoutMs: timeout_ms ?? 120_000 });
+    },
+  });
+
+  defineTool(server, {
+    name: "cleanup_working_files",
+    description: "Delete intermediate directories in the current working dir (calibrated, cosmetic, debayered, weighted, registered, lnorm, wbpp, quicklook) keeping master/, checkpoints/, previews/, project/, pipeline/. dry_run lists what would go.",
+    input: { dry_run: z.boolean().optional(), also_checkpoints: z.boolean().optional().describe("Also delete checkpoints/ (rollback points)"), also_previews: z.boolean().optional() },
+    destructive: true,
+    handler: async ({ dry_run, also_checkpoints, also_previews }) => {
+      const fs = await import("node:fs");
+      const path = await import("node:path");
+      const work = ctx.sessions.ensure().work;
+      const names = ["calibrated", "cosmetic", "debayered", "weighted", "registered", "lnorm", "wbpp", "quicklook"];
+      if (also_checkpoints) names.push("checkpoints");
+      if (also_previews) names.push("previews");
+      const deleted: Array<{ dir: string; gb: number }> = [];
+      for (const n of names) {
+        const d = path.join(work, n);
+        if (!fs.existsSync(d)) continue;
+        let bytes = 0;
+        const walk = (p: string): void => {
+          for (const e of fs.readdirSync(p, { withFileTypes: true })) {
+            const q = path.join(p, e.name);
+            if (e.isDirectory()) walk(q);
+            else bytes += fs.statSync(q).size;
+          }
+        };
+        walk(d);
+        if (!dry_run) fs.rmSync(d, { recursive: true, force: true });
+        deleted.push({ dir: d, gb: Number((bytes / 1e9).toFixed(2)) });
+      }
+      return { work_dir: work, dry_run: !!dry_run, deleted, freed_gb: Number(deleted.reduce((a, b) => a + b.gb, 0).toFixed(2)) };
     },
   });
 
