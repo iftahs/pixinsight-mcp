@@ -149,6 +149,15 @@ Do not try to repair an over-processed image with more processing.
 - Never leave tens of GB behind: after the final export run `cleanup_working_files` (keeps master,
   project, export, previews, checkpoints unless told otherwise).
 
+## Modal dialogs
+
+PixInsight sometimes pops a modal message box (geometry changes that drop the astrometric solution,
+catalog/network errors). The daemon cannot see or click it, so the job stays `running` with a
+silent console. `job_status` reports `hint: "console silent for N s…"` in that case: tell the user
+to click the dialog (or `pi_stop mode:'kill'` + `pi_restart`). All wrapped processes are executed
+with `noGUIMessages = true`, which prevents most of them; `rotate`/`crop` after `plate_solve` are
+normal and just discard the solution.
+
 ## Rollback and code changes
 
 - Every destructive tool returns `checkpoint` (an .xisf path). `restore_checkpoint { path, id }`

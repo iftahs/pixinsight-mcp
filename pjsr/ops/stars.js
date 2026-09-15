@@ -53,7 +53,7 @@ PIMCP.stars = {
       P.autoPSF = false; P.gaussianPSF = false; P.moffatPSF = false; P.moffat4PSF = true;
       P.circularPSF = false; P.astrometry = false; P.regenerate = true; P.autoAperture = true;
       P.searchRadius = 8; P.threshold = 1.0;
-      if (!P.executeGlobal()) PIMCP.fail("DYNAMICPSF_FAILED", "DynamicPSF failed");
+      if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("DYNAMICPSF_FAILED", "DynamicPSF failed");
       var fits = [];
       var psf = P.psf;
       var okStatus = (typeof DynamicPSF.PSF_FittedOk === "number") ? DynamicPSF.PSF_FittedOk : 1;

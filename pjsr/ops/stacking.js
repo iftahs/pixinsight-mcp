@@ -46,7 +46,7 @@ PIMCP.ops.measure_subframes = function (args) {
    P.approvalExpression = args.approval_expression || PIMCP.stack.DEFAULT_APPROVAL;
    P.weightingExpression = args.weighting_expression || PIMCP.stack.DEFAULT_WEIGHTING;
    PIMCP.progress("measure", 0, files.length, "SubframeSelector measuring");
-   if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "SubframeSelector measurement failed");
+   if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "SubframeSelector measurement failed");
    var ms = P.measurements, out = [];
    for (var i = 0; i < ms.length; ++i) out.push(PIMCP.stack.measurementRow(ms[i]));
    // Keep raw rows so output_subframes can write weights without re-measuring.
@@ -79,10 +79,10 @@ PIMCP.ops.output_subframes = function (args) {
    P.overwriteExistingFiles = true;
    P.onError = PIMCP.enumOf(SubframeSelector, "Continue");
    PIMCP.progress("weights", 0, files.length, "measuring (cached) with approval: " + P.approvalExpression);
-   if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "SubframeSelector measurement failed");
+   if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "SubframeSelector measurement failed");
    P.routine = PIMCP.enumOf(SubframeSelector, "OutputSubframes");
    PIMCP.progress("weights", 0, files.length, "writing SSWEIGHT");
-   if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "SubframeSelector output failed");
+   if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "SubframeSelector output failed");
    var outs = [], rejected = [], rows = P.measurements;
    for (var i = 0; i < rows.length; ++i) {
       var m = PIMCP.stack.measurementRow(rows[i]);
@@ -158,7 +158,7 @@ PIMCP.ops.register = function (args) {
       P.onError = PIMCP.enumOf(StarAlignment, "Continue");
       if (args.params) PIMCP.assignParams(P, args.params);
       var ok = false;
-      try { ok = P.executeGlobal(); } catch (e) { ok = false; }
+      try { ok = PIMCP.quiet(P).executeGlobal(); } catch (e) { ok = false; }
       var od = P.outputData;
       var row = (od && od.length && od[0][0]) ? od[0] : null;
       if (!ok || !row) { failed.push({ input: files[i], reason: "StarAlignment failed (not enough matching stars?)" }); continue; }
@@ -194,7 +194,7 @@ PIMCP.ops.local_normalization = function (args) {
       P.noGUIMessages = true;
       P.onError = PIMCP.enumOf(LocalNormalization, "OnError_Continue");
       if (args.params) PIMCP.assignParams(P, args.params);
-      if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "LocalNormalization failed on " + files[i]);
+      if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "LocalNormalization failed on " + files[i]);
       var od = P.outputData;
       var xnml = (od && od.length && od[0][0]) ? od[0][0] : (outDir + "/" + PIMCP.fs.basename(files[i]) + ".xnml");
       outs.push({ input: files[i], xnml: xnml });
@@ -239,7 +239,7 @@ PIMCP.ops.integrate = function (args) {
    if (args.linear_fit_high !== undefined) P.linearFitHigh = Number(args.linear_fit_high);
    if (args.params) PIMCP.assignParams(P, args.params);
    PIMCP.progress("integrate", 0, n, "ImageIntegration " + rej.name + " / " + normName + " / " + wName);
-   if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "ImageIntegration failed");
+   if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "ImageIntegration failed");
    var stats = PIMCP.cal.integrationStats(P, n);
    var perImage = [];
    var idata = P.imageData || [];
@@ -272,7 +272,7 @@ PIMCP.ops.drizzle_integrate = function (args) {
    P.noGUIMessages = true;
    if (args.params) PIMCP.assignParams(P, args.params);
    PIMCP.progress("drizzle", 0, xdrz.length, "DrizzleIntegration x" + P.scale);
-   if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "DrizzleIntegration failed");
+   if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "DrizzleIntegration failed");
    var w = ImageWindow.windowById(P.integrationImageId);
    if (!w || PIMCP.isNull(w)) PIMCP.fail("INTEGRATION_NO_OUTPUT", "DrizzleIntegration produced no image");
    PIMCP.fs.ensureDir(PIMCP.fs.dir(out));
@@ -309,7 +309,7 @@ PIMCP.ops.fast_integrate = function (args) {
    P.outputDirectory = PIMCP.fs.dir(out);
    if (args.params) PIMCP.assignParams(P, args.params);
    PIMCP.progress("fast_integrate", 0, files.length, "FastIntegration");
-   if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "FastIntegration failed");
+   if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "FastIntegration failed");
    var w = ImageWindow.windowById(P.integrationImageId);
    if (!w || PIMCP.isNull(w)) PIMCP.fail("INTEGRATION_NO_OUTPUT", "FastIntegration produced no image");
    if (File.exists(out)) File.remove(out);

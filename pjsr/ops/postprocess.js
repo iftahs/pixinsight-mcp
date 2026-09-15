@@ -27,6 +27,7 @@ PIMCP.pp = {
       return { median: med, clipped_low_pct: clip, size: [img.width, img.height] };
    },
    exec: function (P, v, swap) {
+      PIMCP.quiet(P);
       var ok = P.executeOn(v, swap !== false);
       if (!ok) PIMCP.fail("PI_PROCESS_FAILED", P.processId + " failed on " + v.id);
       return ok;
@@ -53,6 +54,7 @@ PIMCP.ops.apply_process = function (args) {
       args._op = name;
       return PIMCP.pp.destructive(args, function (v) { PIMCP.pp.exec(P, v, args.swap_file !== false); return { process: name, source: P.toSource() }; });
    }
+   PIMCP.quiet(P);
    if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", name + " executeGlobal failed");
    return { process: name, executed: "global", source: P.toSource() };
 };
@@ -723,4 +725,23 @@ PIMCP.ops.save_project = function (args) {
    var props = [];
    try { var ids = v.properties; for (i = 0; i < ids.length; ++i) props.push(ids[i]); } catch (e) { }
    return { main: main, companions: others, view_id: v.id, size: [v.image.width, v.image.height], properties: props.length, history_available: v.window.isModified };
+};
+
+/** Rotate by 90/180/270 (FastRotation, lossless) or any angle (Rotation, resampling). The astrometric solution is dropped. */
+PIMCP.ops.rotate = function (args) {
+   args._op = "rotate";
+   return PIMCP.pp.destructive(args, function (v) {
+      var angle = Number(PIMCP.req(args, "angle"));
+      var a = ((angle % 360) + 360) % 360;
+      if (a === 90 || a === 180 || a === 270) {
+         var P = new FastRotation;
+         P.mode = PIMCP.enumOf(FastRotation, a === 180 ? "Rotate180" : (a === 90 ? "Rotate90CW" : "Rotate90CCW"), "rotation");
+         PIMCP.pp.exec(P, v);
+         return { angle: a, method: "FastRotation" };
+      }
+      var R = new Rotation;
+      R.angle = angle; R.optimizeFast = true;
+      PIMCP.pp.exec(R, v);
+      return { angle: angle, method: "Rotation" };
+   });
 };

@@ -143,6 +143,14 @@ export function registerPostprocessTools(server: McpServer, ctx: AppContext): vo
   });
 
   defineTool(server, {
+    name: "rotate",
+    description: "Rotate the view: 90/180/270 lossless (FastRotation) or any angle (Rotation, resampled). Drops the astrometric solution, so do it after plate_solve/SPCC. Checkpoints first.",
+    input: { id: z.string(), angle: z.number(), checkpoint: Ckpt },
+    destructive: true,
+    handler: async (a) => run("rotate", { ...a, ...ck(a.checkpoint) }),
+  });
+
+  defineTool(server, {
     name: "crop",
     description: "Crop to rect [x, y, w, h]. Checkpoints first.",
     input: { id: z.string(), rect: z.tuple([z.number(), z.number(), z.number(), z.number()]), checkpoint: Ckpt },

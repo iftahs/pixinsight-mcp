@@ -15,7 +15,7 @@ PIMCP.ops.star_mask = function (args) {
    P.shadowsClipping = Number(args.shadows === undefined ? 0 : args.shadows);
    P.mode = PIMCP.enumOf(StarMask, "StarMask");
    if (args.params) PIMCP.assignParams(P, args.params);
-   if (!P.executeOn(v, false)) PIMCP.fail("PI_PROCESS_FAILED", "StarMask failed");
+   if (!PIMCP.quiet(P).executeOn(v, false)) PIMCP.fail("PI_PROCESS_FAILED", "StarMask failed");
    var out = null;
    ws = ImageWindow.windows;
    for (i = 0; i < ws.length; ++i) if (!before[ws[i].mainView.id]) out = ws[i];

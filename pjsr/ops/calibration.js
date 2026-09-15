@@ -88,7 +88,7 @@ PIMCP.cal = {
       }
       if (opts.params) PIMCP.assignParams(P, opts.params);
       PIMCP.progress("integrate_" + kind, 0, files.length, "starting ImageIntegration (" + rej.name + ")");
-      if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "ImageIntegration failed for master " + kind);
+      if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "ImageIntegration failed for master " + kind);
       var stats = PIMCP.cal.integrationStats(P, files.length);
       var fin = PIMCP.cal.finishIntegration(P, opts.out, false, !!opts.keep_rejection_maps);
       return { path: fin.path, rejection: rej.name, stats: stats, frames: files.length, rejection_maps: fin.rejection_maps };
@@ -170,7 +170,7 @@ PIMCP.cal.calibrateFrames = function (files, opts) {
       P.noGUIMessages = true;
       P.masterGUIWarnings = false;
       if (opts.params) PIMCP.assignParams(P, opts.params);
-      if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "ImageCalibration failed on " + files[i]);
+      if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "ImageCalibration failed on " + files[i]);
       var od = P.outputData;
       var row = (od && od.length) ? od[0] : null;
       var outPath = row ? row[0] : (opts.out_dir + "/" + PIMCP.fs.basename(files[i]) + (opts.postfix || "_c") + ".xisf");
@@ -224,7 +224,7 @@ PIMCP.ops.cosmetic_correction = function (args) {
       P.coldAutoCheck = !!args.cold_auto;
       P.coldAutoValue = Number(args.cold_sigma === undefined ? 3.0 : args.cold_sigma);
       if (args.params) PIMCP.assignParams(P, args.params);
-      if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "CosmeticCorrection failed on " + files[i]);
+      if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "CosmeticCorrection failed on " + files[i]);
       outs.push(outDir + "/" + PIMCP.fs.basename(files[i]) + postfix + ".xisf");
    }
    PIMCP.progress("cosmetic", files.length, files.length, "done");
@@ -256,7 +256,7 @@ PIMCP.ops.debayer = function (args) {
       P.noGUIMessages = true;
       P.showImages = false;
       if (args.params) PIMCP.assignParams(P, args.params);
-      if (!P.executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "Debayer failed on " + files[i]);
+      if (!PIMCP.quiet(P).executeGlobal()) PIMCP.fail("PI_PROCESS_FAILED", "Debayer failed on " + files[i]);
       var od = P.outputFileData;
       var row = (od && od.length) ? od[0] : null;
       var outPath = row ? row[0] : (outDir + "/" + PIMCP.fs.basename(files[i]) + postfix + ".xisf");

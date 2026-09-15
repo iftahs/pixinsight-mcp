@@ -91,6 +91,17 @@ PIMCP.hasProcess = function (name) {
    try { return typeof eval(name) === "function"; } catch (e) { return false; }
 };
 
+/**
+ * Suppress GUI message boxes for a process instance. A modal dialog ("astrometric solution will be
+ * deleted… Proceed?", VizieR errors, …) blocks the daemon until a human clicks it, so every process
+ * we execute is silenced when it exposes noGUIMessages / masterGUIWarnings.
+ */
+PIMCP.quiet = function (P) {
+   try { if ("noGUIMessages" in P) P.noGUIMessages = true; } catch (e) { }
+   try { if ("masterGUIWarnings" in P) P.masterGUIWarnings = false; } catch (e2) { }
+   return P;
+};
+
 /** Apply a flat {param: value} object onto a process instance, validating names. */
 PIMCP.assignParams = function (P, params, opts) {
    opts = opts || {};

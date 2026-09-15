@@ -4,6 +4,8 @@ import type { AppContext } from "../context.js";
 import { defineTool } from "./registry.js";
 import { parseRejectionSummary } from "../bridge/logtail.js";
 import { tailFile } from "../util/fsx.js";
+import path from "node:path";
+import fsp from "node:fs/promises";
 
 export function registerJobTools(server: McpServer, ctx: AppContext): void {
   defineTool(server, {
@@ -14,7 +16,16 @@ export function registerJobTools(server: McpServer, ctx: AppContext): void {
     handler: async ({ job_id }) => {
       const r = await ctx.bridge.refresh(job_id);
       const t = ctx.bridge.getJob(job_id);
-      return { ...r, estimated_seconds: t?.estimated_seconds, elapsed_s: r.started_at ? Math.round((Date.now() - Date.parse(r.started_at)) / 1000) : undefined, data: r.status === "ok" ? r.data : undefined, console_tail: r.status === "error" ? r.error?.console_tail : undefined };
+      const elapsed_s = r.started_at ? Math.round((Date.now() - Date.parse(r.started_at)) / 1000) : undefined;
+      let hint: string | undefined;
+      if (r.status === "running" && elapsed_s !== undefined) {
+        // A job whose console log stopped growing for a long time is usually a modal dialog in PixInsight.
+        const logPath = t?.log_path ?? path.join(ctx.cfg.workdir, "bridge", "logs", `${job_id}.log`);
+        const mtime = await fsp.stat(logPath).then((s) => s.mtimeMs).catch(() => undefined);
+        const idle = mtime ? Math.round((Date.now() - mtime) / 1000) : undefined;
+        if (idle !== undefined && idle > 90 && !/integrat|drizzle|wbpp|normaliz|register/i.test(t?.op ?? "")) hint = `console silent for ${idle} s: PixInsight may be showing a modal dialog (look at the screen / ask the user to click it), or the process is genuinely slow`;
+      }
+      return { ...r, estimated_seconds: t?.estimated_seconds, elapsed_s, hint, data: r.status === "ok" ? r.data : undefined, console_tail: r.status === "error" ? r.error?.console_tail : undefined };
     },
   });
 
